@@ -62,7 +62,7 @@ const GRID_SIZE = 20;
 export default function App() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const reactFlowRef = useRef<any>(null);
-    const lastPaintedCell = useRef<string | null>(null);
+    const lastPaintedCell = useRef<{ x: number; y: number } | null>(null);
 
     const nodes = useCircuitStore(s => s.nodes);
     const onNodesChange = useCircuitStore(s => s.onNodesChange);
@@ -117,7 +117,7 @@ export default function App() {
             if (activeTool === 'wire' || activeTool === 'eraser') {
                 eraseWire(grid.x, grid.y);
                 setIsPainting(true);
-                lastPaintedCell.current = `${grid.x},${grid.y}`;
+                lastPaintedCell.current = { x: grid.x, y: grid.y };
             }
             return;
         }
@@ -132,12 +132,12 @@ export default function App() {
             e.preventDefault();
             e.stopPropagation();
             setIsPainting(true);
-            const cellKey = `${grid.x},${grid.y}`;
-            lastPaintedCell.current = cellKey;
+            lastPaintedCell.current = { x: grid.x, y: grid.y };
 
             if (e.button === 2 || activeTool === 'eraser') {
                 eraseWire(grid.x, grid.y);
             } else {
+                // First cell in drag — no previous cell, no direction yet
                 paintWire(grid.x, grid.y);
             }
         } else {
@@ -159,15 +159,20 @@ export default function App() {
 
         if (!isPainting || !(activeTool === 'wire' || activeTool === 'eraser')) return;
 
-        // Skip if same cell as last painted (avoids redundant updates)
-        const cellKey = `${grid.x},${grid.y}`;
-        if (cellKey === lastPaintedCell.current) return;
-        lastPaintedCell.current = cellKey;
+        // Skip if same cell as last painted
+        if (lastPaintedCell.current && lastPaintedCell.current.x === grid.x && lastPaintedCell.current.y === grid.y) return;
 
         if (e.buttons === 2 || activeTool === 'eraser') {
             eraseWire(grid.x, grid.y);
+            lastPaintedCell.current = { x: grid.x, y: grid.y };
         } else {
-            paintWire(grid.x, grid.y);
+            // Paint with directional trace connection from previous cell
+            const prev = lastPaintedCell.current;
+            paintWire(
+                grid.x, grid.y,
+                prev?.x, prev?.y,
+            );
+            lastPaintedCell.current = { x: grid.x, y: grid.y };
         }
     }, [isPainting, activeTool, screenToGrid, paintWire, eraseWire, setHoveredCell]);
 
