@@ -14,6 +14,8 @@ import {
   COMPONENT_MAP,
   wireKey,
   parseWireKey,
+  oppositeDir,
+  dirBetween,
 } from '../types/circuit';
 
 /** Counter state per component type prefix for auto-ID */
@@ -47,8 +49,8 @@ export interface CircuitStoreState {
   selectedNodeId: string | null;
   onNodesChange: OnNodesChange;
 
-  // ─── Wire Grid (dual layer) ───
-  wireGrid: Map<string, boolean>;
+  // ─── Wire Grid (dual layer, directional traces) ───
+  wireGrid: Map<string, number>;
   activeLayer: WireLayer;
 
   // ─── Tool System ───
@@ -71,7 +73,7 @@ export interface CircuitStoreState {
   setSelectedNode: (id: string | null) => void;
 
   // Wire actions
-  paintWire: (x: number, y: number) => void;
+  paintWire: (x: number, y: number, fromX?: number, fromY?: number) => void;
   eraseWire: (x: number, y: number) => void;
   toggleLayer: () => void;
   setActiveLayer: (layer: WireLayer) => void;
@@ -92,7 +94,7 @@ export interface CircuitStoreState {
 export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   nodes: [],
   selectedNodeId: null,
-  wireGrid: new Map(),
+  wireGrid: new Map<string, number>(),
   activeLayer: 'front' as WireLayer,
   activeTool: 'select' as ToolType,
   isPainting: false,
@@ -229,14 +231,33 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
 
   // ─── Wire Grid Actions ───
 
-  paintWire: (x, y) => {
+  /**
+   * Paint a wire cell. Optionally provide previous cell coordinates
+   * to establish a directional trace connection between them.
+   */
+  paintWire: (x: number, y: number, fromX?: number, fromY?: number) => {
     const { wireGrid, activeLayer } = get();
+    const newGrid = new Map(wireGrid);
     const key = wireKey(x, y, activeLayer);
-    if (!wireGrid.has(key)) {
-      const newGrid = new Map(wireGrid);
-      newGrid.set(key, true);
-      set({ wireGrid: newGrid });
+
+    if (fromX !== undefined && fromY !== undefined) {
+      // Drag connection — set direction bits in both cells
+      const dir = dirBetween(fromX, fromY, x, y);
+      const opp = oppositeDir(dir);
+
+      // Current cell gets the INCOMING direction
+      const existingTraces = newGrid.get(key) || 0;
+      newGrid.set(key, existingTraces | opp);
+
+      // Previous cell gets the OUTGOING direction
+      const prevKey = wireKey(fromX, fromY, activeLayer);
+      const prevTraces = newGrid.get(prevKey) || 0;
+      newGrid.set(prevKey, prevTraces | dir);
+    } else if (!newGrid.has(key)) {
+      // Initial cell in drag — mark painted with no direction yet
+      newGrid.set(key, 0);
     }
+    set({ wireGrid: newGrid });
   },
 
   eraseWire: (x, y) => {
@@ -281,8 +302,10 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   getCircuitState: (): CircuitState => {
     const { nodes, wireGrid } = get();
     const wireCells: WireCell[] = [];
-    for (const key of wireGrid.keys()) {
-      wireCells.push(parseWireKey(key));
+    for (const [key, traces] of wireGrid.entries()) {
+      const cell = parseWireKey(key);
+      cell.traces = traces;
+      wireCells.push(cell);
     }
     return {
       version: 2,

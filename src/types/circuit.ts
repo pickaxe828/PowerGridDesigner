@@ -28,11 +28,50 @@ export type ComponentType =
     | 'relay_spdt'
     | 'electron_tube';
 
-/** A single painted wire cell on the grid */
+/** Directional trace bits matching the mod's TraceMatrix encoding */
+export const enum TraceDir {
+    UP    = 1 << 0,   // bit 0
+    DOWN  = 1 << 1,   // bit 1
+    LEFT  = 1 << 2,   // bit 2
+    RIGHT = 1 << 3,   // bit 3
+}
+
+export const DIR_LABELS: Record<number, string> = {
+    [TraceDir.UP]:    '↑',
+    [TraceDir.DOWN]:  '↓',
+    [TraceDir.LEFT]:  '←',
+    [TraceDir.RIGHT]: '→',
+};
+
+/** Get the opposite direction for adjacent-cell connectivity */
+export function oppositeDir(dir: number): number {
+    switch (dir) {
+        case TraceDir.UP:    return TraceDir.DOWN;
+        case TraceDir.DOWN:  return TraceDir.UP;
+        case TraceDir.LEFT:  return TraceDir.RIGHT;
+        case TraceDir.RIGHT: return TraceDir.LEFT;
+    }
+    return 0;
+}
+
+/** Determine direction from (x1,y1) to (x2,y2) — assumes adjacent cells */
+export function dirBetween(x1: number, y1: number, x2: number, y2: number): number {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    if (dx === 1)  return TraceDir.RIGHT;
+    if (dx === -1) return TraceDir.LEFT;
+    if (dy === 1)  return TraceDir.DOWN;
+    if (dy === -1) return TraceDir.UP;
+    return 0;
+}
+
+/** A single painted wire cell including directional trace bits */
 export interface WireCell {
     x: number;
     y: number;
     layer: WireLayer;
+    /** 4-bit directional mask — bit accumulations from multiple passes */
+    traces?: number;
 }
 
 /** Create a map key for a wire cell — O(1) lookup */
