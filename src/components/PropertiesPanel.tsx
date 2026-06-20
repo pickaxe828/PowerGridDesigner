@@ -54,7 +54,7 @@ export default function PropertiesPanel() {
         return (
             <div className="properties-panel">
                 <h2 className="panel-title">Properties</h2>
-                <p className="panel-empty">Select a component or wire cell to edit its properties.</p>
+                <p className="panel-empty">Click a component or wire trace to edit its properties.</p>
                 <div className="panel-help">
                     <h3 className="help-title">Shortcuts</h3>
                     <div className="help-item"><kbd>W</kbd> Wire Paint</div>
@@ -62,8 +62,8 @@ export default function PropertiesPanel() {
                     <div className="help-item"><kbd>R</kbd> Resistor</div>
                     <div className="help-item"><kbd>C</kbd> Capacitor</div>
                     <div className="help-item"><kbd>F</kbd> Flip Layer</div>
+                    <div className="help-item"><kbd>H</kbd> / <kbd>ESC</kbd> Navigate</div>
                     <div className="help-item"><kbd>DEL</kbd> Delete</div>
-                    <div className="help-item"><kbd>ESC</kbd> Select Tool</div>
                 </div>
             </div>
         );

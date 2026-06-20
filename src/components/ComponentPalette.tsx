@@ -24,8 +24,8 @@ export default function ComponentPalette() {
         <div className="palette-items">
           <ToolItem
             tool="select"
-            label="Select"
-            shortcut="ESC"
+            label="Navigate"
+            shortcut="H"
             color="#94a3b8"
             active={activeTool === 'select'}
             onSelect={() => setActiveTool('select')}
@@ -91,7 +91,25 @@ export default function ComponentPalette() {
   );
 }
 
-function ToolItem({ label, shortcut, color, active, onSelect }: {
+const ICON_MAP: Record<string, string> = {
+  resistor: 'resistor.png',
+  capacitor: 'capacitor.png',
+  diode: 'diode.png',
+  varistor: 'varistor.png',
+  barretter_tube: 'barretter_tube.png',
+  neon_bulb: 'neon_bulb.png',
+  regulator_tube: 'regulator_tube.png',
+  inductor: 'copper_coil.png',
+  potentiometer: 'potentiometer.png',
+  bjt_pnp: 'bjt_pnp.png',
+  bjt_npn: 'bjt_npn.png',
+  static_induction_transistor: 'vfet.png',
+  relay_dpdt: 'relay_dpdt.png',
+  relay_spdt: 'relay.png',
+  electron_tube: 'electron_tube.png',
+};
+
+function ToolItem({ tool, label, shortcut, color, active, onSelect }: {
   tool: string;
   label: string;
   shortcut?: string;
@@ -99,14 +117,24 @@ function ToolItem({ label, shortcut, color, active, onSelect }: {
   active: boolean;
   onSelect: () => void;
 }) {
+  const iconSrc = ICON_MAP[tool];
+
   return (
     <button
       className={`palette-item ${active ? 'active' : ''}`}
       onClick={onSelect}
       style={{ '--accent': color } as React.CSSProperties}
     >
-      <div className="palette-item-icon" style={{ backgroundColor: color + '20', borderColor: active ? color : 'transparent' }}>
-        <span className="palette-item-dot" style={{ backgroundColor: color }} />
+      <div className="palette-item-icon">
+        {iconSrc ? (
+          <img
+            src={iconSrc}
+            alt={label}
+            style={{ imageRendering: 'pixelated', width: '100%', height: '100%', objectFit: 'contain' }}
+          />
+        ) : (
+          <span className="palette-item-dot" style={{ backgroundColor: color }} />
+        )}
       </div>
       <span className="palette-item-label">{label}</span>
       {shortcut && <span className="palette-shortcut">{shortcut}</span>}
