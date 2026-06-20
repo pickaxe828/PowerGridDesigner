@@ -10,8 +10,8 @@ const ARM_LEN = CELL_HALF - BODY_HALF;
 const ARM_REACH = CELL_HALF;
 
 const LAYER_COLORS: Record<WireLayer, string> = {
-    front: '#e74c3c',
-    back: '#3498db',
+    front: '#d4d4d4',
+    back: '#737373',
 };
 
 interface TraceCell {
@@ -22,7 +22,12 @@ interface TraceCell {
     traces: number;
 }
 
-export default function WireGridOverlay() {
+interface PreviewLine {
+    start: { x: number; y: number };
+    end: { x: number; y: number };
+}
+
+export default function WireGridOverlay({ previewLine }: { previewLine?: PreviewLine | null }) {
     const wireGrid = useCircuitStore(s => s.wireGrid);
     const activeLayer = useCircuitStore(s => s.activeLayer);
     const selectedWireKey = useCircuitStore(s => s.selectedWireKey);
@@ -39,7 +44,42 @@ export default function WireGridOverlay() {
         return result;
     }, [wireGrid]);
 
+    const previewCells = useMemo(() => {
+        if (!previewLine) return [];
+        const { start, end } = previewLine;
+        const layer = activeLayer;
+        const result: TraceCell[] = [];
+        const isHorizontal = start.y === end.y;
+        const isVertical = start.x === end.x;
+        if (isHorizontal) {
+            const y = start.y;
+            const minX = Math.min(start.x, end.x);
+            const maxX = Math.max(start.x, end.x);
+            for (let x = minX; x <= maxX; x++) {
+                let traces = 0;
+                if (x > minX) traces |= TraceDir.LEFT;
+                if (x < maxX) traces |= TraceDir.RIGHT;
+                if (minX === maxX) traces = 0;
+                result.push({ key: `preview-${x},${y},${layer}`, x, y, layer, traces });
+            }
+        } else if (isVertical) {
+            const x = start.x;
+            const minY = Math.min(start.y, end.y);
+            const maxY = Math.max(start.y, end.y);
+            for (let y = minY; y <= maxY; y++) {
+                let traces = 0;
+                if (y > minY) traces |= TraceDir.UP;
+                if (y < maxY) traces |= TraceDir.DOWN;
+                if (minY === maxY) traces = 0;
+                result.push({ key: `preview-${x},${y},${layer}`, x, y, layer, traces });
+            }
+        }
+        return result;
+    }, [previewLine, activeLayer]);
+
     const inactiveLayer = activeLayer === 'front' ? 'back' : 'front';
+
+    const previewColor = LAYER_COLORS[activeLayer];
 
     return (
         <svg
@@ -79,6 +119,17 @@ export default function WireGridOverlay() {
                             selected={c.key === selectedWireKey}
                         />
                     ))}
+
+                {/* Preview cells rendered on top with low opacity */}
+                {previewCells.map(c => (
+                    <TraceCellRenderer
+                        key={c.key}
+                        cell={c}
+                        color={previewColor}
+                        opacity={0.35}
+                        selected={false}
+                    />
+                ))}
             </g>
         </svg>
     );

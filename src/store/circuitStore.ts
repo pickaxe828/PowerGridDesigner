@@ -57,6 +57,9 @@ export interface CircuitStoreState {
   activeTool: ToolType;
   isPainting: boolean;
 
+  // ─── Board / Plot state ───
+  homeBoard: { bx: number; by: number };
+
   // ─── Interaction State ───
   hoveredCell: { x: number; y: number } | null;
   setHoveredCell: (cell: { x: number; y: number } | null) => void;
@@ -74,6 +77,7 @@ export interface CircuitStoreState {
 
   // Wire actions
   paintWire: (x: number, y: number, fromX?: number, fromY?: number) => void;
+  paintLine: (fromX: number, fromY: number, toX: number, toY: number) => void;
   eraseWire: (x: number, y: number) => void;
   toggleLayer: () => void;
   setActiveLayer: (layer: WireLayer) => void;
@@ -97,6 +101,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   wireGrid: new Map<string, number>(),
   activeLayer: 'front' as WireLayer,
   activeTool: 'select' as ToolType,
+  homeBoard: { bx: 0, by: 0 },
   isPainting: false,
   selectedWireKey: null,
   hoveredCell: null,
@@ -167,6 +172,18 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   },
 
   addComponent: (type, position) => {
+    const { nodes, wireGrid, homeBoard } = get();
+    const isEmpty = nodes.length === 0 && wireGrid.size === 0;
+
+    let nextHome = homeBoard;
+    if (isEmpty) {
+      const bx = Math.floor(position.x / 320);
+      const by = Math.floor(position.y / 320);
+      if (bx !== homeBoard.bx || by !== homeBoard.by) {
+        nextHome = { bx, by };
+      }
+    }
+
     const meta = COMPONENT_MAP[type];
     const id = nextId(meta.idPrefix);
 
@@ -198,7 +215,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
       },
       draggable: true,
     };
-    set({ nodes: [...get().nodes, newNode] });
+    set({ nodes: [...nodes, newNode], homeBoard: nextHome });
   },
 
   removeComponent: (id) => {
@@ -236,28 +253,74 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
    * to establish a directional trace connection between them.
    */
   paintWire: (x: number, y: number, fromX?: number, fromY?: number) => {
-    const { wireGrid, activeLayer } = get();
+    const { wireGrid, activeLayer, nodes, homeBoard } = get();
+    const isEmpty = nodes.length === 0 && wireGrid.size === 0;
+
+    let nextHome = homeBoard;
+    if (isEmpty) {
+      const bx = Math.floor(x / 16);
+      const by = Math.floor(y / 16);
+      if (bx !== homeBoard.bx || by !== homeBoard.by) {
+        nextHome = { bx, by };
+      }
+    }
+
     const newGrid = new Map(wireGrid);
     const key = wireKey(x, y, activeLayer);
 
     if (fromX !== undefined && fromY !== undefined) {
-      // Drag connection — set direction bits in both cells
       const dir = dirBetween(fromX, fromY, x, y);
       const opp = oppositeDir(dir);
-
-      // Current cell gets the INCOMING direction
       const existingTraces = newGrid.get(key) || 0;
       newGrid.set(key, existingTraces | opp);
-
-      // Previous cell gets the OUTGOING direction
       const prevKey = wireKey(fromX, fromY, activeLayer);
       const prevTraces = newGrid.get(prevKey) || 0;
       newGrid.set(prevKey, prevTraces | dir);
     } else if (!newGrid.has(key)) {
-      // Initial cell in drag — mark painted with no direction yet
       newGrid.set(key, 0);
     }
-    set({ wireGrid: newGrid });
+    set({ wireGrid: newGrid, homeBoard: nextHome });
+  },
+
+  paintLine: (fromX: number, fromY: number, toX: number, toY: number) => {
+    const { wireGrid, activeLayer, nodes, homeBoard } = get();
+    const isEmpty = nodes.length === 0 && wireGrid.size === 0;
+
+    let nextHome = homeBoard;
+    if (isEmpty) {
+      const bx = Math.floor(fromX / 16);
+      const by = Math.floor(fromY / 16);
+      if (bx !== homeBoard.bx || by !== homeBoard.by) {
+        nextHome = { bx, by };
+      }
+    }
+
+    const newGrid = new Map(wireGrid);
+
+    const dx = Math.sign(toX - fromX);
+    const dy = Math.sign(toY - fromY);
+    const steps = Math.abs(toX - fromX) + Math.abs(toY - fromY);
+
+    let cx = fromX;
+    let cy = fromY;
+    for (let i = 0; i < steps; i++) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      const dir = dirBetween(cx, cy, nx, ny);
+      const opp = oppositeDir(dir);
+
+      const key = wireKey(nx, ny, activeLayer);
+      const existingTraces = newGrid.get(key) || 0;
+      newGrid.set(key, existingTraces | opp);
+
+      const prevKey = wireKey(cx, cy, activeLayer);
+      const prevTraces = newGrid.get(prevKey) || 0;
+      newGrid.set(prevKey, prevTraces | dir);
+
+      cx = nx;
+      cy = ny;
+    }
+    set({ wireGrid: newGrid, homeBoard: nextHome });
   },
 
   eraseWire: (x, y) => {
@@ -324,7 +387,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   },
 
   clearAll: () => {
-    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select' });
+    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select', homeBoard: { bx: 0, by: 0 } });
     Object.keys(idCounters).forEach(k => { idCounters[k] = 0; });
   },
 }));
