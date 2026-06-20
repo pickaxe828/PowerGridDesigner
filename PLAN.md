@@ -186,6 +186,21 @@ CompoundTag {
 - Verify NBT output structure against mod's expected format
 - Test cross-board via placement and cleanup
 
+### Keyboard Shortcuts (current)
+| Key | Action |
+|-----|--------|
+| `H` / `ESC` | Navigate mode (move canvas + select nodes) |
+| `W` | Wire Paint mode |
+| `E` | Eraser mode |
+| `R` | Rotate selected component |
+| `F` | Flip layer (front/back) |
+| `DEL` / `Backspace` | Delete selected |
+| Component keys | Equip component from registry |
+
+> **TODO — V / Select mode**: A separate "Select" mode (`V` key) should be distinct from "Navigate" (`H`/`ESC`).
+> Navigate = pan canvas + click to inspect. Select = click to select component + show properties.
+> Not yet implemented — currently both behaviors are collapsed into one mode.
+
 ---
 
 ## Component Types (complete set — 24+)
