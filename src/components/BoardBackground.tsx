@@ -3,14 +3,14 @@ import { useStore } from '@xyflow/react';
 
 const GRID_SIZE = 20;
 const BOARD_SIZE = 16;
-const DOT_COLOR = '#475569';
-const LINE_COLOR = 'rgba(71, 85, 105, 0.4)'; // Slightly bumped opacity for visibility
+const MINOR_LINE_COLOR = 'rgba(71, 85, 105, 0.30)';
+const MAJOR_LINE_COLOR = 'rgba(71, 85, 105, 0.45)';
+const ORIGIN_COLOR = '#ef4444';
 
 export default function BoardBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
-  // Efficiently subscribe to strictly the viewport transform and dimensions
-  const transform = useStore((s) => s.transform); // [x, y, zoom]
+  const transform = useStore((s) => s.transform);
   const width = useStore((s) => s.width);
   const height = useStore((s) => s.height);
 
@@ -20,95 +20,73 @@ export default function BoardBackground() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Handle high DPI retina display sharpness
     const dpr = window.devicePixelRatio || 1;
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     ctx.scale(dpr, dpr);
 
-    // Clear previous frames
     ctx.clearRect(0, 0, width, height);
 
     const [tx, ty, zoom] = transform;
 
-    // Calculate visible grid matrix span
-    // Adding extra row/col of bleeding to ensure smooth panning
     const startCol = Math.floor(-tx / (GRID_SIZE * zoom)) - 1;
     const endCol = Math.ceil((width - tx) / (GRID_SIZE * zoom)) + 1;
     const startRow = Math.floor(-ty / (GRID_SIZE * zoom)) - 1;
     const endRow = Math.ceil((height - ty) / (GRID_SIZE * zoom)) + 1;
 
+    const snap = (v: number) => Math.floor(v) + 0.5;
+
     // ==========================================
-    // PASS 1: Render All Minor Dots
+    // PASS 1: Minor square grid lines (every cell, offset to match wire cell edges)
     // ==========================================
     ctx.beginPath();
-    ctx.fillStyle = DOT_COLOR;
-    // Fixed physical pixel size matching standard ReactFlow dots regardless of zoom
-    const dotRadius = 1.5; 
-    
-    let hasOrigin = false;
-    let originX = 0;
-    let originY = 0;
+    ctx.strokeStyle = MINOR_LINE_COLOR;
+    ctx.lineWidth = 0.5;
 
     for (let col = startCol; col <= endCol; col++) {
-      for (let row = startRow; row <= endRow; row++) {
-        const x = col * GRID_SIZE * zoom + tx;
-        const y = row * GRID_SIZE * zoom + ty;
-        
-        // Capture exact point of physical origin natively
-        if (col === 0 && row === 0) {
-          hasOrigin = true;
-          originX = x;
-          originY = y;
-          continue; // Skip rendering standard styling to prevent artifact overlapping
-        }
-        
-        ctx.moveTo(x + dotRadius, y);
-        ctx.arc(x, y, dotRadius, 0, 2 * Math.PI);
-      }
+      const x = snap((col - 0.5) * GRID_SIZE * zoom + tx);
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
     }
-    // Execute filling batch natively for generic dots
-    ctx.fill();
-
-    // Secondary explicitly-styled pass for custom center Anchor natively
-    if (hasOrigin) {
-      ctx.beginPath();
-      ctx.fillStyle = '#ef4444'; // Tailwind core Red-500
-      const originRadius = dotRadius * 2; // Doubled scaling visibility override
-      ctx.arc(originX, originY, originRadius, 0, 2 * Math.PI);
-      ctx.fill();
+    for (let row = startRow; row <= endRow; row++) {
+      const y = snap((row - 0.5) * GRID_SIZE * zoom + ty);
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
     }
+    ctx.stroke();
 
     // ==========================================
-    // PASS 2: Render Major Boundary Lines (over dots)
+    // PASS 2: Major board boundary lines (every 16 cells, offset to match wire cell edges)
     // ==========================================
     ctx.beginPath();
-    ctx.strokeStyle = LINE_COLOR;
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = MAJOR_LINE_COLOR;
+    ctx.lineWidth = 1.5;
 
-    // Vertical major board boundaries
     for (let col = startCol; col <= endCol; col++) {
       if (col % BOARD_SIZE === 0) {
-        const x = col * GRID_SIZE * zoom + tx;
-        // Anti-aliasing sub-pixel constraint push
-        const pxX = Math.floor(x) + 0.5;
-        ctx.moveTo(pxX, 0);
-        ctx.lineTo(pxX, height);
+        const x = snap((col - 0.5) * GRID_SIZE * zoom + tx);
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, height);
       }
     }
-
-    // Horizontal major board boundaries
     for (let row = startRow; row <= endRow; row++) {
       if (row % BOARD_SIZE === 0) {
-        const y = row * GRID_SIZE * zoom + ty;
-        const pxY = Math.floor(y) + 0.5;
-        ctx.moveTo(0, pxY);
-        ctx.lineTo(width, pxY);
+        const y = snap((row - 0.5) * GRID_SIZE * zoom + ty);
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
       }
     }
-
-    // Execute stroking batch natively
     ctx.stroke();
+
+    // ==========================================
+    // PASS 3: Origin marker
+    // ==========================================
+    const originX = tx;
+    const originY = ty;
+    ctx.beginPath();
+    ctx.fillStyle = ORIGIN_COLOR;
+    const size = 3;
+    ctx.fillRect(snap(originX) - size, snap(originY) - size, size * 2, size * 2);
 
   }, [transform, width, height]);
 
@@ -123,7 +101,7 @@ export default function BoardBackground() {
         width: '100%',
         height: '100%',
         pointerEvents: 'none',
-        zIndex: -1, // Sits exactly beneath edges/nodes within React Flow
+        zIndex: -1,
       }}
     />
   );
