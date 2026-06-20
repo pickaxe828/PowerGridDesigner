@@ -1,4 +1,4 @@
-import { comp, int, string, intArray, longArray, list, float } from 'prismarine-nbt';
+import { comp, int, byte, string, intArray, longArray, list, float } from 'prismarine-nbt';
 import type { CircuitComponent, WireCell } from '../types/circuit';
 
 /**
@@ -59,50 +59,33 @@ export function serializeBoard(components: CircuitComponent[], wires: WireCell[]
         });
     }
 
-    // 2. Process Wire Grid Matrix
-    const frontArray = new Int8Array(256); // Defaults to 0
-    const backArray = new Int8Array(256);
+    // 2. Process Wire Grid Matrix — directional TraceMatrix format
+    // 16 longs per layer, one long per row, 4 bits per cell
+    const packDirectional = (layer: 'front' | 'back'): bigint[] => {
+        // 16 longs, each covering one row (16 cells × 4 bits = 64 bits)
+        const longs = new Array<bigint>(16).fill(0n);
 
-    for (const w of wires) {
-        const localX = w.x - startX;
-        const localY = w.y - startY;
-        const index = (localY * 16) + localX;
+        for (const w of wires) {
+            if (w.layer !== layer) continue;
+            const localX = w.x - startX;
+            const localY = w.y - startY;
+            if (localX < 0 || localX >= 16 || localY < 0 || localY >= 16) continue;
 
-        if (w.layer === 'front') {
-            frontArray[index] = 1;
-        } else if (w.layer === 'back') {
-            backArray[index] = 1;
-        }
-    }
-
-    // Sub-routine to pack 256 byte-pixels into 4 Java-compatible 64-bit Longs
-    const packWiresToLongs = (pixels: Int8Array): bigint[] => {
-        // Initialize exactly 4 native BigInts
-        const longs = [0n, 0n, 0n, 0n];
-
-        for (let y = 0; y < 16; y++) {
-            for (let x = 0; x < 16; x++) {
-                if (pixels[(y * 16) + x]) {
-                    const longIndex = Math.floor(y / 4);
-
-                    // Calculate the exact bit position (0 to 63) within this specific Long
-                    // y % 4 gives us the row within the Long (0-3). Multiply by 16 columns.
-                    const bitIndex = BigInt((y % 4) * 16 + x);
-
-                    // Simply shift 1 by the bit index and OR it into the Long
-                    longs[longIndex] |= (1n << bitIndex);
-                }
-            }
+            // Each cell occupies 4 bits at position (x * 4) within long[y]
+            const traces = w.traces || 0;
+            const shift = BigInt(localX * 4);
+            longs[localY] |= (BigInt(traces & 0xF) << shift);
         }
 
-        // Force signed 64-bit limits as required by NBT before handing off natively
+        // Force signed 64-bit limits
         return longs.map(val => BigInt.asIntN(64, val));
     };
 
     // 3. Construct Payload
     return comp({
         Components: list(comp(nbtComponents)),
-        Front: longArray(packWiresToLongs(frontArray)),
-        Back: longArray(packWiresToLongs(backArray))
+        Front: longArray(packDirectional('front')),
+        Back: longArray(packDirectional('back')),
+        FullPixelTraces: byte(0),
     });
 }
