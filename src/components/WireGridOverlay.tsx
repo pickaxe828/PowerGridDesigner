@@ -11,7 +11,7 @@ const ARM_REACH = CELL_HALF;
 
 const LAYER_COLORS: Record<WireLayer, string> = {
     front: '#d4d4d4',
-    back: '#737373',
+    back: '#d4d4d4',
 };
 
 interface TraceCell {
@@ -35,14 +35,19 @@ export default function WireGridOverlay({ previewLine }: { previewLine?: Preview
     const transform = useStore(s => s.transform);
     const [tx, ty, zoom] = transform;
 
-    const cells = useMemo(() => {
+    const sortedCells = useMemo(() => {
         const result: TraceCell[] = [];
         for (const [key, traces] of wireGrid.entries()) {
             const cell = parseWireKey(key);
             result.push({ key, ...cell, traces });
         }
+        result.sort((a, b) => {
+            const aActive = a.layer === activeLayer ? 1 : 0;
+            const bActive = b.layer === activeLayer ? 1 : 0;
+            return aActive - bActive;
+        });
         return result;
-    }, [wireGrid]);
+    }, [wireGrid, activeLayer]);
 
     const previewCells = useMemo(() => {
         if (!previewLine) return [];
@@ -77,10 +82,6 @@ export default function WireGridOverlay({ previewLine }: { previewLine?: Preview
         return result;
     }, [previewLine, activeLayer]);
 
-    const inactiveLayer = activeLayer === 'front' ? 'back' : 'front';
-
-    const previewColor = LAYER_COLORS[activeLayer];
-
     return (
         <svg
             className="wire-grid-overlay"
@@ -96,36 +97,21 @@ export default function WireGridOverlay({ previewLine }: { previewLine?: Preview
             }}
         >
             <g transform={`translate(${tx}, ${ty}) scale(${zoom})`}>
-                {cells
-                    .filter(c => c.layer === inactiveLayer)
-                    .map(c => (
-                        <TraceCellRenderer
-                            key={c.key}
-                            cell={c}
-                            color={LAYER_COLORS[c.layer]}
-                            opacity={0.25}
-                            selected={false}
-                        />
-                    ))}
+                {sortedCells.map(c => (
+                    <TraceCellRenderer
+                        key={c.key}
+                        cell={c}
+                        color={LAYER_COLORS[c.layer]}
+                        opacity={c.layer === activeLayer ? 1 : 0.25}
+                        selected={c.key === selectedWireKey && c.layer === activeLayer}
+                    />
+                ))}
 
-                {cells
-                    .filter(c => c.layer === activeLayer)
-                    .map(c => (
-                        <TraceCellRenderer
-                            key={c.key}
-                            cell={c}
-                            color={LAYER_COLORS[c.layer]}
-                            opacity={0.85}
-                            selected={c.key === selectedWireKey}
-                        />
-                    ))}
-
-                {/* Preview cells rendered on top with low opacity */}
                 {previewCells.map(c => (
                     <TraceCellRenderer
                         key={c.key}
                         cell={c}
-                        color={previewColor}
+                        color={LAYER_COLORS[c.layer]}
                         opacity={0.35}
                         selected={false}
                     />
