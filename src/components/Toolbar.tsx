@@ -7,6 +7,7 @@ export default function Toolbar() {
     const clearAll = useCircuitStore(s => s.clearAll);
     const getCircuitState = useCircuitStore(s => s.getCircuitState);
     const activeLayer = useCircuitStore(s => s.activeLayer);
+    const toggleLayer = useCircuitStore(s => s.toggleLayer);
     const activeTool = useCircuitStore(s => s.activeTool);
 
     // Modal State
@@ -66,8 +67,13 @@ export default function Toolbar() {
                     <span className="toolbar-status-item">
                         Tool: <strong>{toolLabel}</strong>
                     </span>
-                    <span className={`toolbar-status-item layer-badge ${activeLayer}`}>
-                        Layer: <strong>{activeLayer.toUpperCase()}</strong>
+                    <span className="toolbar-status-item">
+                        <span>Layer: </span>
+                        <button className="layer-tgl" onClick={toggleLayer} title={`Switch layer (F)`}>
+                            <strong className={`layer-badge ${activeLayer}`}>{activeLayer.toUpperCase()}</strong>
+                            <span className={`layer-tgl-pill ${activeLayer}`} />
+                        </button>
+                        <kbd className="layer-tgl-kbd">F</kbd>
                     </span>
                 </div>
 
