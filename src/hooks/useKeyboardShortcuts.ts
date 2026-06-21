@@ -40,6 +40,7 @@ export function useKeyboardShortcuts() {
       // ─── Fixed shortcuts ───
       switch (key) {
         case 'escape':
+        case 'h':
           e.preventDefault();
           setActiveTool('select');
           return;

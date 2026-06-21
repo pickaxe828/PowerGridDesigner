@@ -1,10 +1,11 @@
 import { useCircuitStore } from '../store/circuitStore';
-import { COMPONENT_MAP, type Facing } from '../types/circuit';
+import { COMPONENT_MAP, type Facing, TraceDir, DIR_LABELS, wireKey, type WireLayer } from '../types/circuit';
 
 export default function PropertiesPanel() {
     const selectedNodeId = useCircuitStore(s => s.selectedNodeId);
     const selectedWireKey = useCircuitStore(s => s.selectedWireKey);
     const nodes = useCircuitStore(s => s.nodes);
+    const wireGrid = useCircuitStore(s => s.wireGrid);
     const updateComponentData = useCircuitStore(s => s.updateComponentData);
     const rotateComponent = useCircuitStore(s => s.rotateComponent);
     const removeComponent = useCircuitStore(s => s.removeComponent);
@@ -15,19 +16,34 @@ export default function PropertiesPanel() {
     // Wire cell selected
     if (selectedWireKey && !node) {
         const parts = selectedWireKey.split(',');
+        const x = parseInt(parts[0]);
+        const y = parseInt(parts[1]);
+        const layer = parts[2] as WireLayer;
+        const traces = wireGrid.get(selectedWireKey) || 0;
         return (
             <div className="properties-panel">
-                <h2 className="panel-title">Wire Cell</h2>
+                <h2 className="panel-title">Wire Trace</h2>
                 <div className="prop-group">
                     <label className="prop-label">Position</label>
-                    <span className="prop-value-display">({parts[0]}, {parts[1]})</span>
+                    <span className="prop-value-display">({x}, {y})</span>
                 </div>
                 <div className="prop-group">
                     <label className="prop-label">Layer</label>
-                    <span className={`prop-value-display layer-badge ${parts[2]}`}>{parts[2]?.toUpperCase()}</span>
+                    <span className={`prop-value-display layer-badge ${layer}`}>{layer.toUpperCase()}</span>
+                </div>
+                <div className="prop-group">
+                    <label className="prop-label">Directions</label>
+                    <span className="prop-value-display trace-bits">
+                        {traces === 0 ? '(none - isolated cell)' : (
+                            [TraceDir.UP, TraceDir.DOWN, TraceDir.LEFT, TraceDir.RIGHT]
+                                .filter(d => traces & d)
+                                .map(d => DIR_LABELS[d] || d.toString(16))
+                                .join(' ')
+                        )}
+                    </span>
                 </div>
                 <button className="prop-btn danger" onClick={deleteSelected}>
-                    🗑 Delete Wire Cell
+                    🗑 Delete Wire Trace
                 </button>
             </div>
         );
@@ -38,7 +54,7 @@ export default function PropertiesPanel() {
         return (
             <div className="properties-panel">
                 <h2 className="panel-title">Properties</h2>
-                <p className="panel-empty">Select a component or wire cell to edit its properties.</p>
+                <p className="panel-empty">Click a component or wire trace to edit its properties.</p>
                 <div className="panel-help">
                     <h3 className="help-title">Shortcuts</h3>
                     <div className="help-item"><kbd>W</kbd> Wire Paint</div>
@@ -46,8 +62,8 @@ export default function PropertiesPanel() {
                     <div className="help-item"><kbd>R</kbd> Resistor</div>
                     <div className="help-item"><kbd>C</kbd> Capacitor</div>
                     <div className="help-item"><kbd>F</kbd> Flip Layer</div>
+                    <div className="help-item"><kbd>H</kbd> / <kbd>ESC</kbd> Navigate</div>
                     <div className="help-item"><kbd>DEL</kbd> Delete</div>
-                    <div className="help-item"><kbd>ESC</kbd> Select Tool</div>
                 </div>
             </div>
         );

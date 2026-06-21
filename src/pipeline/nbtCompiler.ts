@@ -53,13 +53,7 @@ export function compileToNbtStructure(state: CircuitState, boardX = 0, boardY = 
         w.y >= boardY * 16 && w.y < (boardY + 1) * 16
     );
 
-    const boardTag = {
-        type: 'compound',
-        name: '',
-        // 3. Pass the filtered lists to your perfectly safe serializeBoard function!
-        value: serializeBoard(boardComponents, boardWires, boardX, boardY).value
-    };
-
+    const boardTag = serializeBoard(boardComponents, boardWires, boardX, boardY);
     boardTag.value.Name = nbt.string(`PowerGrid Board ${boardX},${boardY}`);
     return boardTag;
 }

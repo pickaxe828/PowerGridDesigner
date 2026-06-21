@@ -14,6 +14,8 @@ import {
   COMPONENT_MAP,
   wireKey,
   parseWireKey,
+  oppositeDir,
+  dirBetween,
 } from '../types/circuit';
 
 /** Counter state per component type prefix for auto-ID */
@@ -47,13 +49,16 @@ export interface CircuitStoreState {
   selectedNodeId: string | null;
   onNodesChange: OnNodesChange;
 
-  // ─── Wire Grid (dual layer) ───
-  wireGrid: Map<string, boolean>;
+  // ─── Wire Grid (dual layer, directional traces) ───
+  wireGrid: Map<string, number>;
   activeLayer: WireLayer;
 
   // ─── Tool System ───
   activeTool: ToolType;
   isPainting: boolean;
+
+  // ─── Board / Plot state ───
+  homeBoard: { bx: number; by: number };
 
   // ─── Interaction State ───
   hoveredCell: { x: number; y: number } | null;
@@ -71,7 +76,8 @@ export interface CircuitStoreState {
   setSelectedNode: (id: string | null) => void;
 
   // Wire actions
-  paintWire: (x: number, y: number) => void;
+  paintWire: (x: number, y: number, fromX?: number, fromY?: number) => void;
+  paintLine: (fromX: number, fromY: number, toX: number, toY: number) => void;
   eraseWire: (x: number, y: number) => void;
   toggleLayer: () => void;
   setActiveLayer: (layer: WireLayer) => void;
@@ -92,9 +98,10 @@ export interface CircuitStoreState {
 export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   nodes: [],
   selectedNodeId: null,
-  wireGrid: new Map(),
+  wireGrid: new Map<string, number>(),
   activeLayer: 'front' as WireLayer,
   activeTool: 'select' as ToolType,
+  homeBoard: { bx: 0, by: 0 },
   isPainting: false,
   selectedWireKey: null,
   hoveredCell: null,
@@ -165,6 +172,18 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   },
 
   addComponent: (type, position) => {
+    const { nodes, wireGrid, homeBoard } = get();
+    const isEmpty = nodes.length === 0 && wireGrid.size === 0;
+
+    let nextHome = homeBoard;
+    if (isEmpty) {
+      const bx = Math.floor(position.x / 320);
+      const by = Math.floor(position.y / 320);
+      if (bx !== homeBoard.bx || by !== homeBoard.by) {
+        nextHome = { bx, by };
+      }
+    }
+
     const meta = COMPONENT_MAP[type];
     const id = nextId(meta.idPrefix);
 
@@ -196,7 +215,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
       },
       draggable: true,
     };
-    set({ nodes: [...get().nodes, newNode] });
+    set({ nodes: [...nodes, newNode], homeBoard: nextHome });
   },
 
   removeComponent: (id) => {
@@ -229,14 +248,79 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
 
   // ─── Wire Grid Actions ───
 
-  paintWire: (x, y) => {
-    const { wireGrid, activeLayer } = get();
-    const key = wireKey(x, y, activeLayer);
-    if (!wireGrid.has(key)) {
-      const newGrid = new Map(wireGrid);
-      newGrid.set(key, true);
-      set({ wireGrid: newGrid });
+  /**
+   * Paint a wire cell. Optionally provide previous cell coordinates
+   * to establish a directional trace connection between them.
+   */
+  paintWire: (x: number, y: number, fromX?: number, fromY?: number) => {
+    const { wireGrid, activeLayer, nodes, homeBoard } = get();
+    const isEmpty = nodes.length === 0 && wireGrid.size === 0;
+
+    let nextHome = homeBoard;
+    if (isEmpty) {
+      const bx = Math.floor(x / 16);
+      const by = Math.floor(y / 16);
+      if (bx !== homeBoard.bx || by !== homeBoard.by) {
+        nextHome = { bx, by };
+      }
     }
+
+    const newGrid = new Map(wireGrid);
+    const key = wireKey(x, y, activeLayer);
+
+    if (fromX !== undefined && fromY !== undefined) {
+      const dir = dirBetween(fromX, fromY, x, y);
+      const opp = oppositeDir(dir);
+      const existingTraces = newGrid.get(key) || 0;
+      newGrid.set(key, existingTraces | opp);
+      const prevKey = wireKey(fromX, fromY, activeLayer);
+      const prevTraces = newGrid.get(prevKey) || 0;
+      newGrid.set(prevKey, prevTraces | dir);
+    } else if (!newGrid.has(key)) {
+      newGrid.set(key, 0);
+    }
+    set({ wireGrid: newGrid, homeBoard: nextHome });
+  },
+
+  paintLine: (fromX: number, fromY: number, toX: number, toY: number) => {
+    const { wireGrid, activeLayer, nodes, homeBoard } = get();
+    const isEmpty = nodes.length === 0 && wireGrid.size === 0;
+
+    let nextHome = homeBoard;
+    if (isEmpty) {
+      const bx = Math.floor(fromX / 16);
+      const by = Math.floor(fromY / 16);
+      if (bx !== homeBoard.bx || by !== homeBoard.by) {
+        nextHome = { bx, by };
+      }
+    }
+
+    const newGrid = new Map(wireGrid);
+
+    const dx = Math.sign(toX - fromX);
+    const dy = Math.sign(toY - fromY);
+    const steps = Math.abs(toX - fromX) + Math.abs(toY - fromY);
+
+    let cx = fromX;
+    let cy = fromY;
+    for (let i = 0; i < steps; i++) {
+      const nx = cx + dx;
+      const ny = cy + dy;
+      const dir = dirBetween(cx, cy, nx, ny);
+      const opp = oppositeDir(dir);
+
+      const key = wireKey(nx, ny, activeLayer);
+      const existingTraces = newGrid.get(key) || 0;
+      newGrid.set(key, existingTraces | opp);
+
+      const prevKey = wireKey(cx, cy, activeLayer);
+      const prevTraces = newGrid.get(prevKey) || 0;
+      newGrid.set(prevKey, prevTraces | dir);
+
+      cx = nx;
+      cy = ny;
+    }
+    set({ wireGrid: newGrid, homeBoard: nextHome });
   },
 
   eraseWire: (x, y) => {
@@ -281,8 +365,10 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   getCircuitState: (): CircuitState => {
     const { nodes, wireGrid } = get();
     const wireCells: WireCell[] = [];
-    for (const key of wireGrid.keys()) {
-      wireCells.push(parseWireKey(key));
+    for (const [key, traces] of wireGrid.entries()) {
+      const cell = parseWireKey(key);
+      cell.traces = traces;
+      wireCells.push(cell);
     }
     return {
       version: 2,
@@ -301,7 +387,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   },
 
   clearAll: () => {
-    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select' });
+    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select', homeBoard: { bx: 0, by: 0 } });
     Object.keys(idCounters).forEach(k => { idCounters[k] = 0; });
   },
 }));
