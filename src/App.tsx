@@ -224,7 +224,7 @@ export default function App() {
         setIsPainting(false);
         axisLockStart.current = null;
         paintAxis.current = null;
-    }, [paintWire, paintLine, setIsPainting, setWirePreview]);
+    }, [paintWire, paintLine]);
 
     const handleCanvasMouseUp = useCallback(() => {
         commitWirePreview();
