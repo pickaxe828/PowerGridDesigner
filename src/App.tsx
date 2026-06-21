@@ -285,7 +285,13 @@ export default function App() {
                         onNodesChange={onNodesChange}
                         nodeTypes={nodeTypes}
                         snapToGrid={false}
-                        onInit={(instance) => { reactFlowRef.current = instance; }}
+                        onInit={(instance) => {
+                            reactFlowRef.current = instance;
+                            instance.fitBounds(
+                                { x: 0, y: 0, width: 320, height: 320 },
+                                { padding: 0.2, duration: 0 }
+                            );
+                        }}
                         onNodeClick={(_, node) => {
                             if (activeTool === 'select') setSelectedNode(node.id);
                         }}
