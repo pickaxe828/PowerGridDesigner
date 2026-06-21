@@ -19,7 +19,7 @@ export default function ComponentPalette() {
         <h2 className="palette-title">Tools</h2>
         {/* Built-in tools */}
         <div className="palette-category">
-          <h3 className="palette-category-label">🖱 General</h3>
+          <h3 className="palette-category-label standalone">🖱 General</h3>
           <div className="palette-items">
             <ToolItem
               tool="select"
@@ -59,8 +59,8 @@ export default function ComponentPalette() {
                 className="palette-category-header"
                 onClick={() => setCollapsed(prev => ({ ...prev, [cat.key]: !prev[cat.key] }))}
               >
-                <span className={`palette-category-chevron ${isCollapsed ? '' : 'open'}`}>▶</span>
                 <h3 className="palette-category-label">{cat.label}</h3>
+                <span className={`palette-category-chevron ${isCollapsed ? '' : 'open'}`}>▶</span>
               </button>
               {!isCollapsed && (
                 <div className="palette-items">
