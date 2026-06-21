@@ -29,7 +29,7 @@ export type ComponentType =
     | 'electron_tube';
 
 /** Directional trace bits matching the mod's TraceMatrix encoding */
-export const enum TraceDir {
+export enum TraceDir {
     UP    = 1 << 0,   // bit 0
     DOWN  = 1 << 1,   // bit 1
     LEFT  = 1 << 2,   // bit 2
@@ -256,8 +256,8 @@ const TRIODE_PINS: ComponentPin[] = [
 /** Registry of all components with their metadata */
 export const COMPONENT_REGISTRY: ComponentMeta[] = [
     // Passive
-    { type: 'connector', label: 'Wire Connector', idPrefix: 'WC', terminals: 1, category: 'passive', color: '#3a3888ff', pins: CONNECTOR_PIN, width: 40, height: 40, exportLabel: true },
-    { type: 'via', label: 'Via', idPrefix: 'V', terminals: 1, category: 'passive', color: '#3a3888ff', pins: VIA_PIN, width: 20, height: 20, centerOrigin: true },
+    { type: 'connector', label: 'Wire Connector', idPrefix: 'WC', terminals: 1, category: 'passive', color: '#f0e656', pins: CONNECTOR_PIN, width: 40, height: 40, exportLabel: true },
+    { type: 'via', label: 'Via', idPrefix: 'V', terminals: 1, category: 'passive', color: '#f0e656', pins: VIA_PIN, width: 20, height: 20, centerOrigin: true },
     {
         type: 'resistor', label: 'Resistor', idPrefix: 'R', terminals: 2, category: 'passive', color: '#ef4444', shortcutKey: 'r', pins: TWO_PINS,
         properties: [
