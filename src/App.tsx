@@ -8,7 +8,6 @@ import {
 import '@xyflow/react/dist/style.css';
 
 import { useCircuitStore } from './store/circuitStore';
-import type { ComponentType } from './types/circuit';
 import { parseWireKey } from './types/circuit';
 import { useKeyboardShortcuts } from './hooks/useKeyboardShortcuts';
 
@@ -74,6 +73,7 @@ export default function App() {
   const addComponent = useCircuitStore(s => s.addComponent);
   const setSelectedNode = useCircuitStore(s => s.setSelectedNode);
   const activeTool = useCircuitStore(s => s.activeTool);
+  const selectedComponentType = useCircuitStore(s => s.selectedComponentType);
   const paintWire = useCircuitStore(s => s.paintWire);
   const paintLine = useCircuitStore(s => s.paintLine);
   const eraseWire = useCircuitStore(s => s.eraseWire);
@@ -130,7 +130,7 @@ export default function App() {
       if (activeTool === 'wire') {
         eraseWire(grid.x, grid.y);
         setIsPainting(true);
-      } else if (activeTool !== 'select') {
+      } else if (activeTool === 'component') {
         const compId = findComponentAt(grid.x, grid.y);
         if (compId) removeComponent(compId);
       }
@@ -159,14 +159,14 @@ export default function App() {
 
       setWirePreview({ start: grid, end: grid });
       lineToCommit.current = { fromX: grid.x, fromY: grid.y, toX: grid.x, toY: grid.y };
-    } else {
+    } else if (activeTool === 'component') {
       // Component tool — place at grid position
-      addComponent(activeTool as ComponentType, {
+      addComponent(selectedComponentType, {
         x: grid.x * GRID_SIZE,
         y: grid.y * GRID_SIZE,
       });
     }
-  }, [activeTool, screenToGrid, paintWire, eraseWire, addComponent, setIsPainting, findComponentAt, removeComponent]);
+  }, [activeTool, selectedComponentType, screenToGrid, paintWire, eraseWire, addComponent, setIsPainting, findComponentAt, removeComponent]);
 
   /** Mouse move — track hover and update wire preview during painting */
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent) => {

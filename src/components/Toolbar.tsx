@@ -17,6 +17,7 @@ export default function Toolbar() {
   const activeLayer = useCircuitStore(s => s.activeLayer);
   const toggleLayer = useCircuitStore(s => s.toggleLayer);
   const activeTool = useCircuitStore(s => s.activeTool);
+  const selectedComponentType = useCircuitStore(s => s.selectedComponentType);
 
   const [showExportModal, setShowExportModal] = useState(false);
   const [tilesX, setTilesX] = useState(1);
@@ -55,7 +56,8 @@ export default function Toolbar() {
 
   const toolLabel = activeTool === 'select' ? 'Navigate'
     : activeTool === 'wire' ? 'Wire Paint'
-    : activeTool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    : activeTool === 'component' ? `Component (${selectedComponentType.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())})`
+    : '';
 
   return (
     <>

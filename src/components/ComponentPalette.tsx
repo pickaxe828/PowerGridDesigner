@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { COMPONENT_REGISTRY, type ToolType } from '../types/circuit';
+import { COMPONENT_REGISTRY } from '../types/circuit';
 import { useCircuitStore } from '../store/circuitStore';
 import { Button } from '@/components/ui/button';
 
 export default function ComponentPalette() {
   const activeTool = useCircuitStore(s => s.activeTool);
+  const selectedComponentType = useCircuitStore(s => s.selectedComponentType);
   const setActiveTool = useCircuitStore(s => s.setActiveTool);
+  const selectComponentType = useCircuitStore(s => s.selectComponentType);
+  const activateComponentTool = useCircuitStore(s => s.activateComponentTool);
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
   const categories = [
@@ -38,6 +41,13 @@ export default function ComponentPalette() {
             active={activeTool === 'wire'}
             onSelect={() => setActiveTool('wire')}
           />
+          <ToolItem
+            tool="component"
+            label="Component"
+            color="#10b981"
+            active={activeTool === 'component'}
+            onSelect={() => activateComponentTool()}
+          />
 
         </div>
       </div>
@@ -69,8 +79,8 @@ export default function ComponentPalette() {
                     label={comp.label}
                     shortcut={comp.shortcutKey?.toUpperCase()}
                     color={comp.color}
-                    active={activeTool === comp.type}
-                    onSelect={() => setActiveTool(comp.type as ToolType)}
+                    active={activeTool === 'component' && selectedComponentType === comp.type}
+                    onSelect={() => selectComponentType(comp.type)}
                   />
                 ))}
               </div>
@@ -105,6 +115,7 @@ const ICON_MAP: Record<string, string> = {
 const MATERIAL_ICONS: Record<string, string> = {
   select: 'drag_pan',
   wire: 'draw',
+  component: 'category',
 
   connector: 'outbound',
   via: 'circle_circle',

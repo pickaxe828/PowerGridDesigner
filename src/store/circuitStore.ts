@@ -12,6 +12,7 @@ import {
   type CircuitState,
   type WireCell,
   COMPONENT_MAP,
+  COMPONENT_REGISTRY,
   TraceDir,
   wireKey,
   parseWireKey,
@@ -56,6 +57,8 @@ export interface CircuitStoreState {
 
   // ─── Tool System ───
   activeTool: ToolType;
+  selectedComponentType: ComponentType;
+  lastUsedComponentType: ComponentType;
   isPainting: boolean;
 
   // ─── Board / Plot state ───
@@ -85,6 +88,8 @@ export interface CircuitStoreState {
 
   // Tool actions
   setActiveTool: (tool: ToolType) => void;
+  selectComponentType: (type: ComponentType) => void;
+  activateComponentTool: () => void;
   setIsPainting: (painting: boolean) => void;
 
   // Wire selection
@@ -102,6 +107,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   wireGrid: new Map<string, number>(),
   activeLayer: 'front' as WireLayer,
   activeTool: 'select' as ToolType,
+  selectedComponentType: COMPONENT_REGISTRY[0].type,
+  lastUsedComponentType: COMPONENT_REGISTRY[0].type,
   homeBoard: { bx: 0, by: 0 },
   isPainting: false,
   selectedWireKey: null,
@@ -216,7 +223,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
       },
       draggable: true,
     };
-    set({ nodes: [...nodes, newNode], homeBoard: nextHome });
+    set({ nodes: [...nodes, newNode], homeBoard: nextHome, lastUsedComponentType: type });
   },
 
   removeComponent: (id) => {
@@ -364,6 +371,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   // ─── Tool Actions ───
 
   setActiveTool: (tool) => set({ activeTool: tool }),
+  selectComponentType: (type) => set({ activeTool: 'component', selectedComponentType: type, lastUsedComponentType: type }),
+  activateComponentTool: () => set(state => ({ activeTool: 'component', selectedComponentType: state.lastUsedComponentType })),
   setIsPainting: (painting) => set({ isPainting: painting }),
 
   // ─── Wire Selection ───
@@ -431,7 +440,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   },
 
   clearAll: () => {
-    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select', homeBoard: { bx: 0, by: 0 } });
+    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select', selectedComponentType: COMPONENT_REGISTRY[0].type, lastUsedComponentType: COMPONENT_REGISTRY[0].type, homeBoard: { bx: 0, by: 0 } });
     Object.keys(idCounters).forEach(k => { idCounters[k] = 0; });
   },
 }));

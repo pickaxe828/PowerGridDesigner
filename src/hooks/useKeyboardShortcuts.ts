@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useCircuitStore } from '../store/circuitStore';
-import { COMPONENT_REGISTRY, type ToolType } from '../types/circuit';
+import { COMPONENT_REGISTRY } from '../types/circuit';
 
 /** Default keybind mapping */
 export interface KeybindMap {
@@ -14,6 +14,7 @@ export interface KeybindMap {
  */
 export function useKeyboardShortcuts() {
   const setActiveTool = useCircuitStore(s => s.setActiveTool);
+  const selectComponentType = useCircuitStore(s => s.selectComponentType);
   const toggleLayer = useCircuitStore(s => s.toggleLayer);
   const deleteSelected = useCircuitStore(s => s.deleteSelected);
 
@@ -73,7 +74,7 @@ export function useKeyboardShortcuts() {
       const match = COMPONENT_REGISTRY.find(c => c.shortcutKey === key);
       if (match) {
         e.preventDefault();
-        setActiveTool(match.type as ToolType);
+        selectComponentType(match.type);
       }
     }
 

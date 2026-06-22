@@ -5,7 +5,7 @@ export type Facing = 'north' | 'south' | 'east' | 'west';
 export type WireLayer = 'front' | 'back';
 
 /** Tool types — what happens on canvas interaction */
-export type ToolType = 'select' | 'wire' | ComponentType;
+export type ToolType = 'select' | 'wire' | 'component';
 
 /** Supported component types matching Create: Power Grid blocks */
 export type ComponentType =
