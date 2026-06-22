@@ -29,12 +29,12 @@ export type ComponentType =
     | 'electron_tube';
 
 /** Directional trace bits matching the mod's TraceMatrix encoding */
-export enum TraceDir {
-    UP    = 1 << 0,   // bit 0
-    DOWN  = 1 << 1,   // bit 1
-    LEFT  = 1 << 2,   // bit 2
-    RIGHT = 1 << 3,   // bit 3
-}
+export const TraceDir = {
+    UP:    1 << 0,   // bit 0
+    DOWN:  1 << 1,   // bit 1
+    LEFT:  1 << 2,   // bit 2
+    RIGHT: 1 << 3,   // bit 3
+} as const;
 
 export const DIR_LABELS: Record<number, string> = {
     [TraceDir.UP]:    '↑',
