@@ -62,10 +62,7 @@ export function useKeyboardShortcuts() {
           e.preventDefault();
           setActiveTool('wire');
           return;
-        case 'e':
-          e.preventDefault();
-          setActiveTool('eraser');
-          return;
+
         case 'f':
           e.preventDefault();
           toggleLayer();

@@ -55,7 +55,6 @@ export default function Toolbar() {
 
   const toolLabel = activeTool === 'select' ? 'Navigate'
     : activeTool === 'wire' ? 'Wire Paint'
-    : activeTool === 'eraser' ? 'Eraser'
     : activeTool.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
 
   return (

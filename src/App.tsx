@@ -123,18 +123,16 @@ export default function App() {
     const grid = screenToGrid(e.clientX, e.clientY);
     if (!grid) return;
 
-    // Universal Right-Click Deletion
+    // Mode-aware right-click
     if (e.button === 2 || e.buttons === 2) {
       e.preventDefault();
       e.stopPropagation();
-      const compId = findComponentAt(grid.x, grid.y);
-      if (compId) {
-        removeComponent(compId);
-        return;
-      }
-      if (activeTool === 'wire' || activeTool === 'eraser') {
+      if (activeTool === 'wire') {
         eraseWire(grid.x, grid.y);
         setIsPainting(true);
+      } else if (activeTool !== 'select') {
+        const compId = findComponentAt(grid.x, grid.y);
+        if (compId) removeComponent(compId);
       }
       return;
     }
@@ -145,11 +143,11 @@ export default function App() {
     const target = e.target as HTMLElement;
     if (target.closest('.react-flow__node')) return;
 
-    if (activeTool === 'wire' || activeTool === 'eraser') {
+    if (activeTool === 'wire') {
       e.preventDefault();
       e.stopPropagation();
 
-      if (activeTool === 'wire' && isPainting) {
+      if (isPainting) {
         // Second click while previewing → commit
         commitWirePreview();
         return;
@@ -159,12 +157,8 @@ export default function App() {
       axisLockStart.current = { x: grid.x, y: grid.y };
       paintAxis.current = null;
 
-      if (activeTool === 'eraser') {
-        eraseWire(grid.x, grid.y);
-      } else {
-        setWirePreview({ start: grid, end: grid });
-        lineToCommit.current = { fromX: grid.x, fromY: grid.y, toX: grid.x, toY: grid.y };
-      }
+      setWirePreview({ start: grid, end: grid });
+      lineToCommit.current = { fromX: grid.x, fromY: grid.y, toX: grid.x, toY: grid.y };
     } else {
       // Component tool — place at grid position
       addComponent(activeTool as ComponentType, {
@@ -181,9 +175,9 @@ export default function App() {
 
     setHoveredCell(grid);
 
-    if (!isPainting || !(activeTool === 'wire' || activeTool === 'eraser')) return;
+    if (!isPainting || activeTool !== 'wire') return;
 
-    if (e.buttons === 2 || activeTool === 'eraser') {
+    if (e.buttons === 2) {
       eraseWire(grid.x, grid.y);
       return;
     }
@@ -262,7 +256,7 @@ export default function App() {
     }
   }, [nodes]);
 
-  const cursorStyle = (activeTool === 'wire' || activeTool === 'eraser') ? 'crosshair'
+  const cursorStyle = activeTool === 'wire' ? 'crosshair'
     : activeTool === 'select' ? 'grab'
       : 'cell';
 

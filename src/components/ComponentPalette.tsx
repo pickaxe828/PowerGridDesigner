@@ -38,14 +38,7 @@ export default function ComponentPalette() {
             active={activeTool === 'wire'}
             onSelect={() => setActiveTool('wire')}
           />
-          <ToolItem
-            tool="eraser"
-            label="Eraser"
-            shortcut="E"
-            color="#f43f5e"
-            active={activeTool === 'eraser'}
-            onSelect={() => setActiveTool('eraser')}
-          />
+
         </div>
       </div>
 
@@ -112,7 +105,7 @@ const ICON_MAP: Record<string, string> = {
 const MATERIAL_ICONS: Record<string, string> = {
   select: 'drag_pan',
   wire: 'draw',
-  eraser: 'ink_eraser',
+
   connector: 'outbound',
   via: 'circle_circle',
 };
