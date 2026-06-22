@@ -3,7 +3,7 @@ import { type NodeProps } from '@xyflow/react';
 import { BaseNodeComponent } from './BaseNode';
 
 const LVBulbNode = memo(({ ...props }: NodeProps) => (
-    <BaseNodeComponent nodeProps={props} width={20} height={20} svgContent={
+    <BaseNodeComponent nodeProps={props} svgContent={
         <img style={{ imageRendering: 'pixelated', width: '100%', height: '100%' }} src="lv_bulb.png" alt="LV Bulb" />
     } />
 ));

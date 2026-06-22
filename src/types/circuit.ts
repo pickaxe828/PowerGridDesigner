@@ -17,7 +17,7 @@ export type ComponentType =
     | 'varistor'
     | 'barretter_tube'
     | 'neon_bulb'
-    | 'light_bulb'
+    | 'lv_bulb'
     | 'regulator_tube'
     | 'inductor'
     | 'potentiometer'
@@ -280,7 +280,7 @@ export const COMPONENT_REGISTRY: ComponentMeta[] = [
         ]
     },
     {
-        type: 'light_bulb', label: 'LV Bulb', idPrefix: 'LVB', terminals: 2, category: 'passive', color: '#fff492ff', pins: LV_BULB_PINS, exportLabel: true,
+        type: 'lv_bulb', label: 'LV Bulb', idPrefix: 'LVB', terminals: 2, category: 'passive', color: '#fff492ff', pins: LV_BULB_PINS, exportLabel: true,
     },
     {
         type: 'inductor', label: 'Inductor', idPrefix: 'L', terminals: 2, category: 'passive', color: '#fff492ff', pins: TWO_PINS, exportLabel: true,
