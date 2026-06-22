@@ -12,6 +12,7 @@ import {
   type CircuitState,
   type WireCell,
   COMPONENT_MAP,
+  TraceDir,
   wireKey,
   parseWireKey,
   oppositeDir,
@@ -326,11 +327,32 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   eraseWire: (x, y) => {
     const { wireGrid, activeLayer } = get();
     const key = wireKey(x, y, activeLayer);
-    if (wireGrid.has(key)) {
-      const newGrid = new Map(wireGrid);
-      newGrid.delete(key);
-      set({ wireGrid: newGrid });
+    if (!wireGrid.has(key)) return;
+
+    const newGrid = new Map(wireGrid);
+    newGrid.delete(key);
+
+    const neighbors: [number, number, number][] = [
+      [x - 1, y, TraceDir.RIGHT],
+      [x + 1, y, TraceDir.LEFT],
+      [x, y - 1, TraceDir.DOWN],
+      [x, y + 1, TraceDir.UP],
+    ];
+
+    for (const [nx, ny, dir] of neighbors) {
+      const nKey = wireKey(nx, ny, activeLayer);
+      const traces = newGrid.get(nKey);
+      if (traces !== undefined && (traces & dir)) {
+        const updated = traces & ~dir;
+        if (updated === 0) {
+          newGrid.delete(nKey);
+        } else {
+          newGrid.set(nKey, updated);
+        }
+      }
     }
+
+    set({ wireGrid: newGrid });
   },
 
   toggleLayer: () => {
@@ -354,8 +376,30 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
       get().removeComponent(selectedNodeId);
     }
     if (selectedWireKey) {
+      const cell = parseWireKey(selectedWireKey);
       const newGrid = new Map(get().wireGrid);
       newGrid.delete(selectedWireKey);
+
+      const neighbors: [number, number, number][] = [
+        [cell.x - 1, cell.y, TraceDir.RIGHT],
+        [cell.x + 1, cell.y, TraceDir.LEFT],
+        [cell.x, cell.y - 1, TraceDir.DOWN],
+        [cell.x, cell.y + 1, TraceDir.UP],
+      ];
+
+      for (const [nx, ny, dir] of neighbors) {
+        const nKey = wireKey(nx, ny, cell.layer);
+        const traces = newGrid.get(nKey);
+        if (traces !== undefined && (traces & dir)) {
+          const updated = traces & ~dir;
+          if (updated === 0) {
+            newGrid.delete(nKey);
+          } else {
+            newGrid.set(nKey, updated);
+          }
+        }
+      }
+
       set({ wireGrid: newGrid, selectedWireKey: null });
     }
   },
