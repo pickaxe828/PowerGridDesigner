@@ -285,6 +285,8 @@ export default function App() {
                         onNodesChange={onNodesChange}
                         nodeTypes={nodeTypes}
                         snapToGrid={false}
+                        panOnScroll={true}
+                        panOnScrollSpeed={1}
                         onInit={(instance) => {
                             reactFlowRef.current = instance;
                             instance.fitBounds(
