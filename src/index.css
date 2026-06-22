@@ -241,6 +241,13 @@
   padding: 1px 4px;
   border-radius: 2px;
   white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.circuit-node:hover .pin-label,
+.circuit-node[data-selected] .pin-label {
+  opacity: 1;
 }
 
 /* ─── Wire Grid Overlay ─── */
