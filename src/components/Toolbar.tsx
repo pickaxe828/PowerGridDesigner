@@ -74,8 +74,9 @@ export default function Toolbar() {
           </span>
           <span className="text-[11px] text-muted-foreground flex items-center gap-1">
             <span>Layer:</span>
-            <button
-              className="inline-flex items-center gap-1 cursor-pointer"
+            <Button
+              variant="ghost"
+              size="xs"
               onClick={toggleLayer}
               title="Switch layer (F)"
             >
@@ -85,7 +86,7 @@ export default function Toolbar() {
               <span className={`w-5 h-2.5 rounded-full relative ${activeLayer === 'front' ? 'bg-[#e74c3c55]' : 'bg-[#3498db55]'}`}>
                 <span className={`absolute block w-2 h-2 rounded-full top-px transition-[margin] duration-200 ${activeLayer === 'front' ? 'bg-[#e74c3c] left-px' : 'bg-[#3498db] left-[11px]'}`} />
               </span>
-            </button>
+            </Button>
             <kbd className="text-[9px] font-bold text-foreground bg-muted border border-border rounded px-1.5 min-w-[18px] text-center ml-1">F</kbd>
           </span>
         </div>

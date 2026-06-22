@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { COMPONENT_REGISTRY, type ToolType } from '../types/circuit';
 import { useCircuitStore } from '../store/circuitStore';
+import { Button } from '@/components/ui/button';
 
 export default function ComponentPalette() {
   const activeTool = useCircuitStore(s => s.activeTool);
@@ -56,15 +57,16 @@ export default function ComponentPalette() {
         const isCollapsed = collapsed[cat.key] ?? false;
         return (
           <div key={cat.key} className="mb-1">
-            <button
-              className="flex items-center gap-1 w-full px-3 py-1 bg-transparent border-none cursor-pointer hover:bg-muted transition-colors duration-150"
+            <Button
+              variant="ghost"
+              className="flex items-center gap-1 w-full justify-start px-3 py-1 h-auto text-[10px] font-bold uppercase tracking-wider text-foreground"
               onClick={() => setCollapsed(prev => ({ ...prev, [cat.key]: !prev[cat.key] }))}
             >
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-foreground">{cat.label}</h3>
+              {cat.label}
               <span className={`text-[8px] text-muted-foreground flex-shrink-0 ml-auto transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}>
                 ▶
               </span>
-            </button>
+            </Button>
             {!isCollapsed && (
               <div className="flex flex-col gap-0.5">
                 {items.map(comp => (
@@ -103,6 +105,7 @@ const ICON_MAP: Record<string, string> = {
   static_induction_transistor: 'vfet.png',
   relay_dpdt: 'relay_dpdt.png',
   relay_spdt: 'relay.png',
+  lv_bulb: 'lv_bulb.png',
   electron_tube: 'electron_tube.png',
 };
 
@@ -126,13 +129,9 @@ function ToolItem({ tool, label, shortcut, color, active, onSelect }: {
   const matIcon = MATERIAL_ICONS[tool];
 
   return (
-    <button
-      className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-all duration-150
-        border w-full text-left
-        ${active
-          ? 'bg-secondary'
-          : 'border-transparent bg-transparent hover:bg-muted hover:border-border'}
-        active:scale-[0.97]`}
+    <Button
+      variant={active ? 'secondary' : 'ghost'}
+      className="flex items-center gap-2 px-2 py-1.5 h-auto w-full justify-start text-xs font-bold text-muted-foreground"
       style={active ? { borderColor: color, boxShadow: `0 0 8px ${color}40` } : undefined}
       onClick={onSelect}
     >
@@ -158,12 +157,12 @@ function ToolItem({ tool, label, shortcut, color, active, onSelect }: {
           <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
         )}
       </div>
-      <span className="text-xs font-bold text-muted-foreground flex-1">{label}</span>
+      <span className="flex-1 text-left">{label}</span>
       {shortcut && (
         <kbd className="text-[9px] font-bold text-foreground bg-muted border border-border rounded px-1.5 min-w-[18px] text-center">
           {shortcut}
         </kbd>
       )}
-    </button>
+    </Button>
   );
 }
