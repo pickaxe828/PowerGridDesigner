@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { COMPONENT_REGISTRY, type ToolType } from '../types/circuit';
 import { useCircuitStore } from '../store/circuitStore';
 
-/** Tool-selector component palette sidebar */
 export default function ComponentPalette() {
   const activeTool = useCircuitStore(s => s.activeTool);
   const setActiveTool = useCircuitStore(s => s.setActiveTool);
@@ -15,72 +14,77 @@ export default function ComponentPalette() {
   ] as const;
 
   return (
-    <div className="component-palette">
-        <h2 className="palette-title">Tools</h2>
-        {/* Built-in tools */}
-        <div className="palette-category">
-          <h3 className="palette-category-label standalone">🖱 General</h3>
-          <div className="palette-items">
-            <ToolItem
-              tool="select"
-              label="Navigate"
-              shortcut="H"
-              color="#5294f2"
-              active={activeTool === 'select'}
-              onSelect={() => setActiveTool('select')}
-            />
-            <ToolItem
-              tool="wire"
-              label="Wire Paint"
-              shortcut="W"
-              color="#f59e0b"
-              active={activeTool === 'wire'}
-              onSelect={() => setActiveTool('wire')}
-            />
-            <ToolItem
-              tool="eraser"
-              label="Eraser"
-              shortcut="E"
-              color="#f43f5e"
-              active={activeTool === 'eraser'}
-              onSelect={() => setActiveTool('eraser')}
-            />
-          </div>
+    <div className="w-[200px] bg-card border-r border-border flex-shrink-0 flex flex-col">
+      <div className="flex-1 overflow-y-auto p-3 pl-3.5">
+      <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground pb-2 mb-2 border-b border-border">Tools</h2>
+
+      <div className="mb-1">
+        <h3 className="text-[10px] font-bold uppercase tracking-wider text-foreground py-1">🖱 General</h3>
+        <div className="flex flex-col gap-0.5">
+          <ToolItem
+            tool="select"
+            label="Navigate"
+            shortcut="H"
+            color="#5294f2"
+            active={activeTool === 'select'}
+            onSelect={() => setActiveTool('select')}
+          />
+          <ToolItem
+            tool="wire"
+            label="Wire Paint"
+            shortcut="W"
+            color="#f59e0b"
+            active={activeTool === 'wire'}
+            onSelect={() => setActiveTool('wire')}
+          />
+          <ToolItem
+            tool="eraser"
+            label="Eraser"
+            shortcut="E"
+            color="#f43f5e"
+            active={activeTool === 'eraser'}
+            onSelect={() => setActiveTool('eraser')}
+          />
         </div>
-        {/* Component tools */}
-        <h2 className="palette-title">Components</h2>
-        {categories.map(cat => {
-          const items = COMPONENT_REGISTRY.filter(c => c.category === cat.key);
-          if (!items.length) return null;
-          const isCollapsed = collapsed[cat.key] ?? false;
-          return (
-            <div key={cat.key} className="palette-category">
-              <button
-                className="palette-category-header"
-                onClick={() => setCollapsed(prev => ({ ...prev, [cat.key]: !prev[cat.key] }))}
-              >
-                <h3 className="palette-category-label">{cat.label}</h3>
-                <span className={`palette-category-chevron ${isCollapsed ? '' : 'open'}`}>▶</span>
-              </button>
-              {!isCollapsed && (
-                <div className="palette-items">
-                  {items.map(comp => (
-                    <ToolItem
-                      key={comp.type}
-                      tool={comp.type}
-                      label={comp.label}
-                      shortcut={comp.shortcutKey?.toUpperCase()}
-                      color={comp.color}
-                      active={activeTool === comp.type}
-                      onSelect={() => setActiveTool(comp.type as ToolType)}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          );
+      </div>
+
+      <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground pb-2 mb-2 border-b border-border">Components</h2>
+
+      {categories.map(cat => {
+        const items = COMPONENT_REGISTRY.filter(c => c.category === cat.key);
+        if (!items.length) return null;
+        const isCollapsed = collapsed[cat.key] ?? false;
+        return (
+          <div key={cat.key} className="mb-1">
+            <button
+              className="flex items-center gap-1 w-full px-3 py-1 bg-transparent border-none cursor-pointer hover:bg-muted transition-colors duration-150"
+              onClick={() => setCollapsed(prev => ({ ...prev, [cat.key]: !prev[cat.key] }))}
+            >
+              <h3 className="text-[10px] font-bold uppercase tracking-wider text-foreground">{cat.label}</h3>
+              <span className={`text-[8px] text-muted-foreground flex-shrink-0 ml-auto transition-transform duration-150 ${isCollapsed ? '' : 'rotate-90'}`}>
+                ▶
+              </span>
+            </button>
+            {!isCollapsed && (
+              <div className="flex flex-col gap-0.5">
+                {items.map(comp => (
+                  <ToolItem
+                    key={comp.type}
+                    tool={comp.type}
+                    label={comp.label}
+                    shortcut={comp.shortcutKey?.toUpperCase()}
+                    color={comp.color}
+                    active={activeTool === comp.type}
+                    onSelect={() => setActiveTool(comp.type as ToolType)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        );
         })}
       </div>
+    </div>
   );
 }
 
@@ -123,11 +127,16 @@ function ToolItem({ tool, label, shortcut, color, active, onSelect }: {
 
   return (
     <button
-      className={`palette-item ${active ? 'active' : ''}`}
+      className={`flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-all duration-150
+        border w-full text-left
+        ${active
+          ? 'bg-secondary'
+          : 'border-transparent bg-transparent hover:bg-muted hover:border-border'}
+        active:scale-[0.97]`}
+      style={active ? { borderColor: color, boxShadow: `0 0 8px ${color}40` } : undefined}
       onClick={onSelect}
-      style={{ '--accent': color } as React.CSSProperties}
     >
-      <div className={`palette-item-icon ${matIcon ? 'palette-item-icon-symbol' : ''}`}>
+      <div className={`w-7 h-7 flex items-center justify-center rounded flex-shrink-0 ${matIcon ? 'bg-muted border border-border' : ''}`}>
         {iconSrc ? (
           <img
             src={iconSrc}
@@ -135,13 +144,26 @@ function ToolItem({ tool, label, shortcut, color, active, onSelect }: {
             style={{ imageRendering: 'pixelated', width: '100%', height: '100%', objectFit: 'contain' }}
           />
         ) : matIcon ? (
-          <span className="material-symbols-outlined palette-item-symbol">{matIcon}</span>
+          <span
+            className="material-symbols-outlined text-[18px] leading-none"
+            style={{
+              fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20",
+              color: active ? color : 'var(--tw-color-foreground)',
+              lineHeight: 1,
+            }}
+          >
+            {matIcon}
+          </span>
         ) : (
-          <span className="palette-item-dot" style={{ backgroundColor: color }} />
+          <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
         )}
       </div>
-      <span className="palette-item-label">{label}</span>
-      {shortcut && <kbd className="palette-shortcut">{shortcut}</kbd>}
+      <span className="text-xs font-bold text-muted-foreground flex-1">{label}</span>
+      {shortcut && (
+        <kbd className="text-[9px] font-bold text-foreground bg-muted border border-border rounded px-1.5 min-w-[18px] text-center">
+          {shortcut}
+        </kbd>
+      )}
     </button>
   );
 }
