@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Temporary issue/planning files
+*_ISSUE.md
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
