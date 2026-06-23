@@ -12,4 +12,13 @@ export default defineConfig({
             '@': path.resolve(__dirname, './src'),
         },
     },
+    build: {
+        sourcemap: true
+    },
+    server: {
+        sourcemapIgnoreList: false // Ensures VS Code can map internal files if needed
+    },
+    css: {
+        devSourcemap: true // Optional: Also maps your CSS/SASS files
+    }
 })
