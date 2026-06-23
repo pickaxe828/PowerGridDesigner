@@ -4,7 +4,7 @@ import { BaseNodeComponent } from './BaseNode';
 
 const LVBulbNode = memo(({ ...props }: NodeProps) => (
     <BaseNodeComponent nodeProps={props} svgContent={
-        <img style={{ imageRendering: 'pixelated', width: '100%', height: '100%' }} src="lv_bulb.png" alt="LV Bulb" />
+        <img style={{ imageRendering: 'pixelated', objectFit: 'contain', width: '100%', height: '100%' }} src="lv_bulb.png" alt="LV Bulb" />
     } />
 ));
 LVBulbNode.displayName = 'LVBulbNode';

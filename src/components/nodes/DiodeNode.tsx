@@ -4,7 +4,7 @@ import { BaseNodeComponent } from './BaseNode';
 
 const DiodeNode = memo(({ ...props }: NodeProps) => (
     <BaseNodeComponent nodeProps={props} svgContent={
-        <img style={{ imageRendering: 'pixelated', width: '100%', height: '100%' }} src="diode.png" alt="Diode" />
+        <img style={{ imageRendering: 'pixelated', objectFit: 'contain', width: '100%', height: '100%' }} src="diode.png" alt="Diode" />
     } />
 ));
 DiodeNode.displayName = 'DiodeNode';

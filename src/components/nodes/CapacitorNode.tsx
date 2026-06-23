@@ -4,7 +4,7 @@ import { BaseNodeComponent } from './BaseNode';
 
 const CapacitorNode = memo(({ ...props }: NodeProps) => (
     <BaseNodeComponent nodeProps={props} svgContent={
-        <img style={{ imageRendering: 'pixelated', width: '100%', height: '100%' }} src="capacitor.png" alt="Capacitor" />
+        <img style={{ imageRendering: 'pixelated', objectFit: 'contain', width: '100%', height: '100%' }} src="capacitor.png" alt="Capacitor" />
     } />
 ));
 CapacitorNode.displayName = 'CapacitorNode';
