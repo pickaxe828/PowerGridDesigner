@@ -66,7 +66,9 @@ export interface CircuitStoreState {
 
   // ─── Interaction State ───
   hoveredCell: { x: number; y: number } | null;
+  hoveredNodeId: string | null;
   setHoveredCell: (cell: { x: number; y: number } | null) => void;
+  setHoveredNodeId: (id: string | null) => void;
   findComponentAt: (x: number, y: number) => string | null;
 
   // ─── Selected wire cells ───
@@ -113,8 +115,10 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   isPainting: false,
   selectedWireKey: null,
   hoveredCell: null,
+  hoveredNodeId: null,
 
   setHoveredCell: (cell) => set({ hoveredCell: cell }),
+  setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
 
   findComponentAt: (x, y) => {
     const nodes = get().nodes;
@@ -370,7 +374,10 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
 
   // ─── Tool Actions ───
 
-  setActiveTool: (tool) => set({ activeTool: tool }),
+  setActiveTool: (tool) => set({
+    activeTool: tool,
+    ...(tool === 'wire' ? { selectedNodeId: null, selectedWireKey: null } : {}),
+  }),
   selectComponentType: (type) => set({ activeTool: 'component', selectedComponentType: type, lastUsedComponentType: type }),
   activateComponentTool: () => set(state => ({ activeTool: 'component', selectedComponentType: state.lastUsedComponentType })),
   setIsPainting: (painting) => set({ isPainting: painting }),

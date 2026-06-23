@@ -16,6 +16,7 @@ import PropertiesPanel from './components/PropertiesPanel';
 import Toolbar from './components/Toolbar';
 import WireGridOverlay from './components/WireGridOverlay';
 import BoardBackground from './components/BoardBackground';
+import NodeLabelOverlay from './components/NodeLabelOverlay';
 
 // Node types
 import ResistorNode from './components/nodes/ResistorNode';
@@ -83,6 +84,7 @@ export default function App() {
   const setHoveredCell = useCircuitStore(s => s.setHoveredCell);
   const findComponentAt = useCircuitStore(s => s.findComponentAt);
   const removeComponent = useCircuitStore(s => s.removeComponent);
+  const setHoveredNodeId = useCircuitStore(s => s.setHoveredNodeId);
 
   // Keep paintLine ref current for the global mouseup handler
   const paintLineRef = useRef(paintLine);
@@ -288,8 +290,10 @@ export default function App() {
                 { padding: 0.2, duration: 0 }
               );
             }}
+            onNodeMouseEnter={(_, node) => setHoveredNodeId(node.id)}
+            onNodeMouseLeave={() => setHoveredNodeId(null)}
             onNodeClick={(_, node) => {
-              if (activeTool === 'select') setSelectedNode(node.id);
+              if (activeTool === 'select' || activeTool === 'component') setSelectedNode(node.id);
             }}
             onPaneClick={() => {
               if (activeTool === 'select') {
@@ -315,6 +319,7 @@ export default function App() {
               maskColor="rgba(10, 10, 15, 0.7)"
             />
             <WireGridOverlay previewLine={wirePreview} />
+            <NodeLabelOverlay />
           </ReactFlow>
         </div>
         <PropertiesPanel />

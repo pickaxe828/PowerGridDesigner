@@ -63,17 +63,7 @@ function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: p
         {svgContent}
       </div>
 
-      {/* Label overlay (does not rotate) */}
-      <div className="circuit-node-label">
-        <span className="circuit-node-id">{data.label}</span>
-        {data.value !== undefined && (
-          <span className="circuit-node-value">
-            {formatValue(data.value)}{data.unit || ''}
-          </span>
-        )}
-      </div>
-
-      {/* Smart Pins Overlay (Always Visible) */}
+      {/* Pin dots overlay */}
       <div className="circuit-pins">
         {rotatedPins.map(pin => (
           <div
@@ -82,7 +72,6 @@ function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: p
             style={{ left: pin.x, top: pin.y }}
           >
             <div className="pin-dot" style={{ backgroundColor: meta?.color || '#38bdf8' }} />
-            <span className="pin-label">{pin.label}</span>
           </div>
         ))}
       </div>

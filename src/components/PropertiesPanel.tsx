@@ -97,6 +97,15 @@ export default function PropertiesPanel() {
       <h2 className="text-sm font-extrabold uppercase tracking-wider text-foreground pb-2 mb-3 border-b border-border">Properties</h2>
 
       <div className="mb-3">
+        <Label className="text-[9px] font-semibold uppercase tracking-wider text-foreground mb-1">Label</Label>
+        <Input
+          type="text"
+          value={(node.data.label as string) || ''}
+          onChange={e => updateComponentData(node.id, { label: e.target.value })}
+        />
+      </div>
+
+      <div className="mb-3">
         <Label className="text-[9px] font-semibold uppercase tracking-wider text-foreground mb-1">ID</Label>
         <span className="text-xs text-foreground px-2 py-1 bg-muted rounded inline-block">{node.data.label as string}</span>
       </div>
@@ -144,15 +153,6 @@ export default function PropertiesPanel() {
           />
         </div>
       ))}
-
-      <div className="mb-3">
-        <Label className="text-[9px] font-semibold uppercase tracking-wider text-foreground mb-1">Label</Label>
-        <Input
-          type="text"
-          value={(node.data.label as string) || ''}
-          onChange={e => updateComponentData(node.id, { label: e.target.value })}
-        />
-      </div>
 
       <Button variant="destructive" size="sm" onClick={() => removeComponent(node.id)} className="w-full mt-4 text-[10px]">
         🗑 Delete Component
