@@ -166,6 +166,8 @@
 .circuit-node {
   position: relative;
   cursor: grab;
+  background: transparent;
+  border-radius: 4px;
   transition: filter 0.15s ease;
 }
 .circuit-node * {
@@ -174,11 +176,13 @@
 }
 .circuit-node[data-selected="true"] {
   outline: 2px solid #f59e0b;
-  outline-offset: 4px;
+  outline-offset: -2px;
   border-radius: 4px;
   box-shadow: 0 0 16px rgba(245, 158, 11, 0.3);
 }
 .circuit-node-body {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -207,7 +211,7 @@
   right: 0;
   bottom: 0;
   pointer-events: none;
-  z-index: 20;
+  z-index: 1;
 }
 .pin-marker {
   position: absolute;
