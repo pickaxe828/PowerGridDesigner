@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { type NodeProps } from '@xyflow/react';
-import { facingToDeg } from '../../store/circuitStore';
+import { useCircuitStore, facingToDeg } from '../../store/circuitStore';
 import { COMPONENT_MAP, type Facing } from '../../types/circuit';
 
 interface BaseNodeData {
@@ -32,6 +32,11 @@ function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: p
   const meta = COMPONENT_MAP[data.componentType as keyof typeof COMPONENT_MAP];
   const width = propsWidth || meta?.width || 40;
   const height = propsHeight || meta?.height || 40;
+
+  const activeTool = useCircuitStore(s => s.activeTool);
+  const nearbyNodeIds = useCircuitStore(s => s.nearbyNodeIds);
+  const selectedNodeId = useCircuitStore(s => s.selectedNodeId);
+  const isNearbyInWireMode = activeTool === 'wire' && nearbyNodeIds.has(nodeProps.id);
   const deg = facingToDeg(data.facing || 'north');
 
   const cx = width / 2;
@@ -53,12 +58,14 @@ function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: p
     <div
       className="circuit-node"
       style={{ width: `${width}px`, height: `${height}px` }}
-      data-selected={nodeProps.selected ? 'true' : undefined}
+      data-selected={selectedNodeId === nodeProps.id ? 'true' : undefined}
+      data-nearby={isNearbyInWireMode ? 'true' : undefined}
     >
       {/* SVG body — ONLY this rotates */}
       <div
         className="circuit-node-body"
         style={{ transform: `rotate(${deg}deg)`, width: `${width}px`, height: `${height}px` }}
+        onDragStart={(e) => e.preventDefault()}
       >
         {svgContent}
       </div>

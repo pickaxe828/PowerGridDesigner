@@ -141,9 +141,8 @@ export default function App() {
 
     if (activeTool === 'select') return;
 
-    // Don't paint when clicking on nodes
     const target = e.target as HTMLElement;
-    if (target.closest('.react-flow__node')) return;
+    if (activeTool !== 'wire' && target.closest('.react-flow__node')) return;
 
     if (activeTool === 'wire') {
       e.preventDefault();
@@ -269,6 +268,7 @@ export default function App() {
         <ComponentPalette />
         <div
           className="flex-1 relative"
+          data-tool={activeTool}
           style={{ cursor: cursorStyle }}
           onMouseDown={handleCanvasMouseDown}
           onMouseMove={handleCanvasMouseMove}
@@ -293,17 +293,20 @@ export default function App() {
             onNodeMouseEnter={(_, node) => setHoveredNodeId(node.id)}
             onNodeMouseLeave={() => setHoveredNodeId(null)}
             onNodeClick={(_, node) => {
-              if (activeTool === 'select' || activeTool === 'component') setSelectedNode(node.id);
+              if (activeTool === 'select' || activeTool === 'component') {
+                setSelectedNode(node.id);
+              }
             }}
             onPaneClick={() => {
-              if (activeTool === 'select') {
+              if (activeTool === 'select' || activeTool === 'wire') {
                 setSelectedNode(null);
                 setSelectedWireKey(null);
               }
             }}
             defaultViewport={{ x: -120, y: -120, zoom: 1 }}
             proOptions={{ hideAttribution: true }}
-            nodesDraggable={activeTool === 'select'}
+            nodesFocusable={activeTool !== 'wire'}
+            nodesDraggable={activeTool === 'component'}
             panOnDrag={activeTool === 'select' ? true : [1]}
           >
             <BoardBackground />

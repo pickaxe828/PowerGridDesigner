@@ -168,6 +168,10 @@
   cursor: grab;
   transition: filter 0.15s ease;
 }
+.circuit-node * {
+  user-select: none;
+  -webkit-user-drag: none;
+}
 .circuit-node[data-selected="true"] {
   outline: 2px solid #f59e0b;
   outline-offset: 4px;
@@ -182,6 +186,9 @@
 }
 .circuit-node:hover .circuit-node-body {
   opacity: 0.45;
+}
+.circuit-node[data-nearby="true"] .circuit-node-body {
+  opacity: 0.3;
 }
 .circuit-node-label {
   font-size: 9px;
