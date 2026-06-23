@@ -180,8 +180,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
         return {
           ...change,
           position: {
-            x: Math.round(change.position.x / 20) * 20,
-            y: Math.round(change.position.y / 20) * 20,
+            x: Math.round((change.position.x + 10) / 20) * 20 - 10,
+            y: Math.round((change.position.y + 10) / 20) * 20 - 10,
           },
         };
       }
@@ -230,12 +230,12 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
       type,
       origin: meta.centerOrigin ? [0.5, 0.5] : [0, 0],
       position: {
-        x: Math.round(position.x / 20) * 20,
-        y: Math.round(position.y / 20) * 20,
+        x: Math.round(position.x / 20) * 20 - 10,
+        y: Math.round(position.y / 20) * 20 - 10,
       },
-      width: meta.width || 40,
-      height: meta.height || 40,
-      style: { width: meta.width || 40, height: meta.height || 40 },
+      width: meta.width || 60,
+      height: meta.height || 60,
+      style: { width: meta.width || 60, height: meta.height || 60 },
       data: {
         label: id,
         componentType: type,

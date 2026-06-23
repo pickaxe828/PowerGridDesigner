@@ -167,7 +167,7 @@ export interface ComponentMeta {
 
 // Common pin definitions
 const CONNECTOR_PIN: ComponentPin[] = [
-    { id: 'C', label: 'C', x: 20, y: 20 },
+    { id: 'C', label: 'C', x: 30, y: 30 },
 ];
 
 const VIA_PIN: ComponentPin[] = [
@@ -175,156 +175,161 @@ const VIA_PIN: ComponentPin[] = [
 ];
 
 const TWO_PINS: ComponentPin[] = [
-    { id: 'T1', label: '1', x: 0, y: 20 },
-    { id: 'T2', label: '2', x: 40, y: 20 },
+    { id: 'T1', label: '1', x: 10, y: 30 },
+    { id: 'T2', label: '2', x: 50, y: 30 },
+];
+
+const DIODE_PINS: ComponentPin[] = [
+    { id: 'T1', label: '+', x: 10, y: 30 },
+    { id: 'T2', label: '-', x: 50, y: 30 },
 ];
 
 const VARISTOR_PINS: ComponentPin[] = [
-    { id: 'T1', label: '1', x: 0, y: 20 },
-    { id: 'T2', label: '2', x: 60, y: 40 },
+    { id: 'T1', label: '1', x: 10, y: 30 },
+    { id: 'T2', label: '2', x: 70, y: 50 },
 ];
 
 const TUBE_PINS: ComponentPin[] = [
-    { id: 'T1', label: '1', x: 0, y: 0 },
-    { id: 'T2', label: '2', x: 20, y: 20 },
+    { id: 'T1', label: '1', x: 10, y: 10 },
+    { id: 'T2', label: '2', x: 30, y: 30 },
 ];
 
 const REGULATOR_TUBE_PINS: ComponentPin[] = [
-    { id: 'Anode', label: '+', x: 0, y: 20 },
-    { id: 'Cathode', label: '-', x: 40, y: 20 },
+    { id: 'Anode', label: '+', x: 10, y: 30 },
+    { id: 'Cathode', label: '-', x: 50, y: 30 },
 ];
 
 const LV_BULB_PINS: ComponentPin[] = [
-    { id: 'T1', label: '1', x: 0, y: 20 },
-    { id: 'T2', label: '2', x: 40, y: 20 },
+    { id: 'T1', label: '1', x: 10, y: 30 },
+    { id: 'T2', label: '2', x: 50, y: 30 },
 ];
 
 const POT_PINS: ComponentPin[] = [
-    { id: 'T1', label: '1', x: 20, y: 40 },
-    { id: 'T2', label: '2', x: 60, y: 40 },
-    { id: 'W', label: 'W', x: 40, y: 60 },
+    { id: 'T1', label: '1', x: 30, y: 50 },
+    { id: 'T2', label: '2', x: 70, y: 50 },
+    { id: 'W', label: 'W', x: 50, y: 70 },
 ];
 
 const NPN_BJT_PINS: ComponentPin[] = [
-    { id: 'C', label: 'C', x: 0, y: 20 },
-    { id: 'B', label: 'B', x: 20, y: 40 },
-    { id: 'E', label: 'E', x: 40, y: 20 },
+    { id: 'C', label: 'C', x: 10, y: 10 },
+    { id: 'B', label: 'B', x: 30, y: 30 },
+    { id: 'E', label: 'E', x: 50, y: 10 },
 ];
 
 const PNP_BJT_PINS: ComponentPin[] = [
-    { id: 'C', label: 'C', x: 40, y: 20 },
-    { id: 'B', label: 'B', x: 20, y: 40 },
-    { id: 'E', label: 'E', x: 0, y: 20 },
+    { id: 'C', label: 'C', x: 10, y: 10 },
+    { id: 'B', label: 'B', x: 30, y: 30 },
+    { id: 'E', label: 'E', x: 50, y: 10 },
 ];
 
 const VFET_PINS: ComponentPin[] = [
-    { id: 'D', label: 'D', x: 0, y: 0 },
-    { id: 'S', label: 'S', x: 40, y: 0 },
-    { id: 'G', label: 'G', x: 20, y: 40 },
+    { id: 'D', label: 'D', x: 10, y: 10 },
+    { id: 'S', label: 'S', x: 50, y: 10 },
+    { id: 'G', label: 'G', x: 30, y: 50 },
 ];
 
 const DPDT_PINS: ComponentPin[] = [
     // Left side (coil)
-    { id: 'C1', label: 'C1', x: 0, y: 0 },
-    { id: 'C2', label: 'C2', x: 0, y: 80 },
+    { id: 'C1', label: 'C1', x: 10, y: 10 },
+    { id: 'C2', label: 'C2', x: 10, y: 50 },
     // Middle (Switch 1)
-    { id: 'NO1', label: 'NO', x: 40, y: 0 },
-    { id: 'COM1', label: 'CM', x: 40, y: 40 },
-    { id: 'NC1', label: 'NC', x: 40, y: 80 },
+    { id: 'NC1', label: 'NC', x: 50, y: 10 },
+    { id: 'COM1', label: 'CM', x: 50, y: 30 },
+    { id: 'NO1', label: 'NO', x: 50, y: 50 },
     // Right (Switch 2)
-    { id: 'NO2', label: 'NO', x: 80, y: 0 },
-    { id: 'COM2', label: 'CM', x: 80, y: 40 },
-    { id: 'NC2', label: 'NC', x: 80, y: 80 },
+    { id: 'NC2', label: 'NC', x: 90, y: 10 },
+    { id: 'COM2', label: 'CM', x: 90, y: 30 },
+    { id: 'NO2', label: 'NO', x: 90, y: 50 },
 ];
 
 const SPDT_PINS: ComponentPin[] = [
-    { id: 'C1', label: 'C1', x: 0, y: 0 },
-    { id: 'C2', label: 'C2', x: 0, y: 80 },
-    { id: 'NO', label: 'NO', x: 40, y: 0 },
-    { id: 'COM', label: 'CM', x: 60, y: 40 },
-    { id: 'NC', label: 'NC', x: 40, y: 80 },
+    { id: 'C1', label: 'C1', x: 10, y: 10 },
+    { id: 'C2', label: 'C2', x: 10, y: 50 },
+    { id: 'COM', label: 'CM', x: 70, y: 30 },
+    { id: 'NO', label: 'NO', x: 50, y: 10 },
+    { id: 'NC', label: 'NC', x: 50, y: 50 },
 ];
 
 const TRIODE_PINS: ComponentPin[] = [
-    { id: 'A', label: 'A', x: 0, y: 0 },
-    { id: 'C', label: 'C', x: 20, y: 20 },
-    { id: 'G', label: 'G', x: 40, y: 0 },
-    { id: 'H1', label: 'H1', x: 0, y: 40 },
-    { id: 'H2', label: 'H2', x: 40, y: 40 },
+    { id: 'A', label: 'A', x: 10, y: 10 },
+    { id: 'C', label: 'C', x: 30, y: 30 },
+    { id: 'G', label: 'G', x: 50, y: 10 },
+    { id: 'H1', label: 'H1', x: 10, y: 50 },
+    { id: 'H2', label: 'H2', x: 50, y: 50 },
 ];
 
 /** Registry of all components with their metadata */
 export const COMPONENT_REGISTRY: ComponentMeta[] = [
     // Passive
-    { type: 'connector', label: 'Wire Connector', idPrefix: 'WC', terminals: 1, category: 'passive', color: '#f0e656', pins: CONNECTOR_PIN, width: 40, height: 40, exportLabel: true },
-    { type: 'via', label: 'Via', idPrefix: 'V', terminals: 1, category: 'passive', color: '#f0e656', pins: VIA_PIN, width: 20, height: 20, centerOrigin: true },
+    { type: 'connector', label: 'Wire Connector', idPrefix: 'WC', terminals: 1, category: 'passive', color: '#f0e656', pins: CONNECTOR_PIN, width: 60, height: 60, exportLabel: true },
+    { type: 'via', label: 'Via', idPrefix: 'V', terminals: 1, category: 'passive', color: '#f0e656', pins: VIA_PIN, width: 20, height: 20 },
     {
-        type: 'resistor', label: 'Resistor', idPrefix: 'R', terminals: 2, category: 'passive', color: '#ef4444', shortcutKey: 'r', pins: TWO_PINS,
+        type: 'resistor', label: 'Resistor', idPrefix: 'R', terminals: 2, category: 'passive', color: '#ef4444', shortcutKey: 'r', pins: TWO_PINS, width: 60, height: 60,
         properties: [
             { id: 'resistance', label: 'Resistance', unit: 'Ω', defaultValue: 100, min: 0.1, max: 1E8 }
         ]
     },
     {
-        type: 'capacitor', label: 'Capacitor', idPrefix: 'C', terminals: 2, category: 'passive', color: '#3b82f6', shortcutKey: 'c', pins: TWO_PINS,
+        type: 'capacitor', label: 'Capacitor', idPrefix: 'C', terminals: 2, category: 'passive', color: '#3b82f6', shortcutKey: 'c', pins: TWO_PINS, width: 60, height: 60,
         properties: [{ id: 'capacitance', label: 'Capacitance', unit: 'mF', defaultValue: 1, min: 1E-9, max: 1000 }]
     },
     {
-        type: 'varistor', label: 'Varistor', idPrefix: 'VR', terminals: 2, category: 'passive', color: '#f97316', pins: VARISTOR_PINS, width: 60, height: 40,
+        type: 'varistor', label: 'Varistor', idPrefix: 'VR', terminals: 2, category: 'passive', color: '#f97316', pins: VARISTOR_PINS, width: 80, height: 80,
         properties: [{ id: 'varistor_voltage', label: 'Clamping Voltage', unit: 'V', defaultValue: 100, min: 50, max: 1000 }]
     },
     {
-        type: 'potentiometer', label: 'Potentiometer', idPrefix: 'POT', terminals: 3, category: 'passive', color: '#8b5cf6', pins: POT_PINS, width: 60, height: 60,
+        type: 'potentiometer', label: 'Potentiometer', idPrefix: 'POT', terminals: 3, category: 'passive', color: '#8b5cf6', pins: POT_PINS, width: 100, height: 100,
         properties: [
             { id: 'potentiometer_resistance', label: 'Max Resistance', unit: 'Ω', defaultValue: 10000, min: 100, max: 100_000 },
             { id: 'potentiometer_value', label: 'Value', unit: '%', defaultValue: 50, min: 0, max: 100 }
         ]
     },
     {
-        type: 'lv_bulb', label: 'LV Bulb', idPrefix: 'LVB', terminals: 2, category: 'passive', color: '#fff492ff', pins: LV_BULB_PINS, exportLabel: true,
+        type: 'lv_bulb', label: 'LV Bulb', idPrefix: 'LVB', terminals: 2, category: 'passive', color: '#fff492ff', pins: LV_BULB_PINS, width: 60, height: 60, exportLabel: true,
     },
     {
-        type: 'inductor', label: 'Inductor', idPrefix: 'L', terminals: 2, category: 'passive', color: '#fff492ff', pins: TWO_PINS, exportLabel: true,
+        type: 'inductor', label: 'Inductor', idPrefix: 'L', terminals: 2, category: 'passive', color: '#fff492ff', pins: TWO_PINS, width: 60, height: 60, exportLabel: true,
         properties: [{ id: 'inductance', label: 'Inductance', unit: 'mH', defaultValue: 0.1, min: 1E-4, max: 1000 }]
     },
     // Active
     {
-        type: 'diode', label: 'Diode', idPrefix: 'D', terminals: 2, category: 'active', color: '#10b981', pins: TWO_PINS
+        type: 'diode', label: 'Diode', idPrefix: 'D', terminals: 2, category: 'active', color: '#10b981', pins: DIODE_PINS, width: 60, height: 60
     },
     {
-        type: 'barretter_tube', label: 'Barretter Tube', idPrefix: 'BT', terminals: 2, category: 'active', color: '#ec4899', pins: TUBE_PINS,
+        type: 'barretter_tube', label: 'Barretter Tube', idPrefix: 'BT', terminals: 2, category: 'active', color: '#ec4899', pins: TUBE_PINS, width: 40, height: 40,
         properties: [
             { id: 'barretter_current', label: 'Holding Current', unit: 'A', defaultValue: 0.1, min: 0.01, max: 2 },
             { id: 'barretter_resistance', label: 'Resistance', unit: 'Ω', defaultValue: 10, min: 10, max: 1000 }
         ]
     },
     {
-        type: 'neon_bulb', label: 'Neon Bulb', idPrefix: 'NE', terminals: 2, category: 'active', color: '#fbbf24', pins: TUBE_PINS, exportLabel: true,
+        type: 'neon_bulb', label: 'Neon Bulb', idPrefix: 'NE', terminals: 2, category: 'active', color: '#fbbf24', pins: TUBE_PINS, width: 40, height: 40, exportLabel: true,
         properties: [{ id: 'neon_bulb_vb', label: 'Breakdown Voltage', unit: 'V', defaultValue: 60, min: 30, max: 300 }]
     },
     {
-        type: 'regulator_tube', label: 'Regulator Tube', idPrefix: 'VT', terminals: 2, category: 'active', color: '#6366f1', pins: REGULATOR_TUBE_PINS,
+        type: 'regulator_tube', label: 'Regulator Tube', idPrefix: 'VT', terminals: 2, category: 'active', color: '#6366f1', pins: REGULATOR_TUBE_PINS, width: 60, height: 60,
         properties: [{ id: 'regulator_tube_vh', label: 'Holding Voltage', unit: 'V', defaultValue: 60, min: 30, max: 500 }]
     },
     {
-        type: 'bjt_pnp', label: 'PNP BJT', idPrefix: 'Q', terminals: 3, category: 'active', color: '#f43f5e', pins: PNP_BJT_PINS,
+        type: 'bjt_pnp', label: 'PNP BJT', idPrefix: 'Q', terminals: 3, category: 'active', color: '#f43f5e', pins: PNP_BJT_PINS, width: 60, height: 40,
         properties: [
             { id: 'bjt_gain', label: 'Gain', unit: 'hFE', defaultValue: 20, min: 5, max: 500 }
         ]
     },
     {
-        type: 'bjt_npn', label: 'NPN BJT', idPrefix: 'Q', terminals: 3, category: 'active', color: '#14b8a6', pins: NPN_BJT_PINS,
+        type: 'bjt_npn', label: 'NPN BJT', idPrefix: 'Q', terminals: 3, category: 'active', color: '#14b8a6', pins: NPN_BJT_PINS, width: 60, height: 40,
         properties: [
             { id: 'bjt_gain', label: 'Gain', unit: 'hFE', defaultValue: 20, min: 5, max: 500 }
         ]
     },
     {
-        type: 'static_induction_transistor', label: 'Static Induction Transistor', idPrefix: 'SIT', terminals: 3, category: 'active', color: '#a855f7', pins: VFET_PINS,
+        type: 'static_induction_transistor', label: 'Static Induction Transistor', idPrefix: 'SIT', terminals: 3, category: 'active', color: '#a855f7', pins: VFET_PINS, width: 60, height: 60,
         properties: [{ id: 'vfet_gain', label: 'Gain', unit: 'hFE', defaultValue: 10, min: 1, max: 100 },
         { id: 'vfet_kg', label: 'Transconductance', unit: 'S', defaultValue: 0.1, min: 0.01, max: 1 }
         ]
     },
     {
-        type: 'electron_tube', label: 'Electron Tube', idPrefix: 'ET', terminals: 5, category: 'active', color: '#94a3b8', pins: TRIODE_PINS, width: 60, height: 80,
+        type: 'electron_tube', label: 'Electron Tube', idPrefix: 'ET', terminals: 5, category: 'active', color: '#94a3b8', pins: TRIODE_PINS, width: 60, height: 60,
         properties: [
             { id: 'tube_gain', label: 'Gain', unit: 'μ', defaultValue: 5, min: 1, max: 100 },
             { id: 'tube_transconductance', label: 'Transconductance', unit: 'S', defaultValue: 6800, min: 200, max: 10_000 },
@@ -334,13 +339,13 @@ export const COMPONENT_REGISTRY: ComponentMeta[] = [
     },
     // Switching
     {
-        type: 'relay_dpdt', label: 'Relay DPDT', idPrefix: 'K', terminals: 8, category: 'switching', color: '#64748b', pins: DPDT_PINS, width: 80, height: 80,
+        type: 'relay_dpdt', label: 'Relay DPDT', idPrefix: 'K', terminals: 8, category: 'switching', color: '#64748b', pins: DPDT_PINS, width: 100, height: 60,
         properties: [
             { id: 'relay_threshold', label: 'Threshold Voltage', unit: 'V', defaultValue: 12, min: 1, max: 120 }
         ]
     },
     {
-        type: 'relay_spdt', label: 'Relay SPDT', idPrefix: 'K', terminals: 5, category: 'switching', color: '#94a3b8', pins: SPDT_PINS, width: 60, height: 80, properties: [
+        type: 'relay_spdt', label: 'Relay SPDT', idPrefix: 'K', terminals: 5, category: 'switching', color: '#94a3b8', pins: SPDT_PINS, width: 80, height: 60, properties: [
             { id: 'relay_threshold', label: 'Threshold Voltage', unit: 'V', defaultValue: 12, min: 1, max: 120 }
         ]
     },

@@ -30,8 +30,8 @@ interface BaseNodeProps {
 function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: propsHeight }: BaseNodeProps) {
   const data = nodeProps.data as unknown as BaseNodeData;
   const meta = COMPONENT_MAP[data.componentType as keyof typeof COMPONENT_MAP];
-  const width = propsWidth || meta?.width || 40;
-  const height = propsHeight || meta?.height || 40;
+  const width = propsWidth || meta?.width || 60;
+  const height = propsHeight || meta?.height || 60;
 
   const activeTool = useCircuitStore(s => s.activeTool);
   const nearbyNodeIds = useCircuitStore(s => s.nearbyNodeIds);
