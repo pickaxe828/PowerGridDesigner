@@ -100,8 +100,12 @@ src/
 - Wire grid coords are integer grid indices (not pixels). Conversion: `Math.floor((px + 10) / 20)`.
 - Boards are 16×16 cell chunks (320px).
 
-## Key Architecture
+## Git & Committing
+- **Conventional Commits**: `type(scope): message` — types: `feat`, `fix`, `refactor`, `perf`, `docs`, `test`, `chore`, `build`, `ci`, `style`, `revert`
+- **No push without explicit request** — stage and commit only. Never push, force-push, or create PRs unless asked.
+- **Split commits**: Keep each commit focused on a single logical change. Avoid mixing formatting, refactors, and feature work in the same commit.
 
+## Key Architecture
 - **Wire traces**: 4-bit directional mask per cell (UP/DOWN/LEFT/RIGHT bits). Stored as `number` in the `wireGrid` Map.
 - **Tool system**: `activeTool` can be `'select'`, `'wire'`, `'eraser'`, or any `ComponentType` string.
 - **Component nodes**: `BaseNode.tsx` handles rotation, pin rendering, labels. Each specific node provides only `svgContent` (image/SVG) and dimensions.
