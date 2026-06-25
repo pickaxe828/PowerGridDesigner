@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { type NodeProps } from '@xyflow/react';
-import { facingToDeg } from '../../store/circuitStore';
+import { useCircuitStore, facingToDeg } from '../../store/circuitStore';
 import { COMPONENT_MAP, type Facing } from '../../types/circuit';
 
 interface BaseNodeData {
@@ -30,8 +30,13 @@ interface BaseNodeProps {
 function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: propsHeight }: BaseNodeProps) {
   const data = nodeProps.data as unknown as BaseNodeData;
   const meta = COMPONENT_MAP[data.componentType as keyof typeof COMPONENT_MAP];
-  const width = propsWidth || meta?.width || 40;
-  const height = propsHeight || meta?.height || 40;
+  const width = propsWidth || meta?.width || 60;
+  const height = propsHeight || meta?.height || 60;
+
+  const activeTool = useCircuitStore(s => s.activeTool);
+  const nearbyNodeIds = useCircuitStore(s => s.nearbyNodeIds);
+  const selectedNodeId = useCircuitStore(s => s.selectedNodeId);
+  const isNearbyInWireMode = activeTool === 'wire' && nearbyNodeIds.has(nodeProps.id);
   const deg = facingToDeg(data.facing || 'north');
 
   const cx = width / 2;
@@ -53,27 +58,19 @@ function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: p
     <div
       className="circuit-node"
       style={{ width: `${width}px`, height: `${height}px` }}
-      data-selected={nodeProps.selected ? 'true' : undefined}
+      data-selected={selectedNodeId === nodeProps.id ? 'true' : undefined}
+      data-nearby={isNearbyInWireMode ? 'true' : undefined}
     >
       {/* SVG body — ONLY this rotates */}
       <div
         className="circuit-node-body"
         style={{ transform: `rotate(${deg}deg)`, width: `${width}px`, height: `${height}px` }}
+        onDragStart={(e) => e.preventDefault()}
       >
         {svgContent}
       </div>
 
-      {/* Label overlay (does not rotate) */}
-      <div className="circuit-node-label">
-        <span className="circuit-node-id">{data.label}</span>
-        {data.value !== undefined && (
-          <span className="circuit-node-value">
-            {formatValue(data.value)}{data.unit || ''}
-          </span>
-        )}
-      </div>
-
-      {/* Smart Pins Overlay (Always Visible) */}
+      {/* Pin dots overlay */}
       <div className="circuit-pins">
         {rotatedPins.map(pin => (
           <div
@@ -82,7 +79,6 @@ function BaseNodeComponent({ nodeProps, svgContent, width: propsWidth, height: p
             style={{ left: pin.x, top: pin.y }}
           >
             <div className="pin-dot" style={{ backgroundColor: meta?.color || '#38bdf8' }} />
-            <span className="pin-label">{pin.label}</span>
           </div>
         ))}
       </div>

@@ -4,7 +4,7 @@ import { BaseNodeComponent } from './BaseNode';
 
 const StaticInductionTransistorNode = memo(({ ...props }: NodeProps) => (
     <BaseNodeComponent nodeProps={props} svgContent={
-        <img style={{ imageRendering: 'pixelated', width: '100%', height: '100%' }} src="vfet.png" alt="VFET" />
+        <img style={{ imageRendering: 'pixelated', objectFit: 'contain', width: '100%', height: '100%' }} src="vfet.png" alt="VFET" />
     } />
 ));
 StaticInductionTransistorNode.displayName = 'StaticInductionTransistorNode';

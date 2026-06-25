@@ -12,6 +12,8 @@ import {
   type CircuitState,
   type WireCell,
   COMPONENT_MAP,
+  COMPONENT_REGISTRY,
+  TraceDir,
   wireKey,
   parseWireKey,
   oppositeDir,
@@ -55,6 +57,8 @@ export interface CircuitStoreState {
 
   // ─── Tool System ───
   activeTool: ToolType;
+  selectedComponentType: ComponentType;
+  lastUsedComponentType: ComponentType;
   isPainting: boolean;
 
   // ─── Board / Plot state ───
@@ -62,7 +66,10 @@ export interface CircuitStoreState {
 
   // ─── Interaction State ───
   hoveredCell: { x: number; y: number } | null;
+  hoveredNodeId: string | null;
+  nearbyNodeIds: Set<string>;
   setHoveredCell: (cell: { x: number; y: number } | null) => void;
+  setHoveredNodeId: (id: string | null) => void;
   findComponentAt: (x: number, y: number) => string | null;
 
   // ─── Selected wire cells ───
@@ -84,6 +91,8 @@ export interface CircuitStoreState {
 
   // Tool actions
   setActiveTool: (tool: ToolType) => void;
+  selectComponentType: (type: ComponentType) => void;
+  activateComponentTool: () => void;
   setIsPainting: (painting: boolean) => void;
 
   // Wire selection
@@ -101,12 +110,33 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   wireGrid: new Map<string, number>(),
   activeLayer: 'front' as WireLayer,
   activeTool: 'select' as ToolType,
+  selectedComponentType: COMPONENT_REGISTRY[0].type,
+  lastUsedComponentType: COMPONENT_REGISTRY[0].type,
   homeBoard: { bx: 0, by: 0 },
   isPainting: false,
   selectedWireKey: null,
   hoveredCell: null,
+  hoveredNodeId: null,
+  nearbyNodeIds: new Set<string>(),
 
-  setHoveredCell: (cell) => set({ hoveredCell: cell }),
+  setHoveredCell: (cell) => {
+    if (!cell) return set({ hoveredCell: null, nearbyNodeIds: new Set() });
+    const state = get();
+    const nearbyNodeIds = new Set<string>();
+    const THRESHOLD = 1;
+    for (const node of state.nodes) {
+      const nx = Math.floor(node.position.x / 20);
+      const ny = Math.floor(node.position.y / 20);
+      const nw = Math.floor(((node.width as number) || 40) / 20);
+      const nh = Math.floor(((node.height as number) || 40) / 20);
+      if (cell.x >= nx - THRESHOLD && cell.x < nx + nw + THRESHOLD &&
+          cell.y >= ny - THRESHOLD && cell.y < ny + nh + THRESHOLD) {
+        nearbyNodeIds.add(node.id);
+      }
+    }
+    set({ hoveredCell: cell, nearbyNodeIds });
+  },
+  setHoveredNodeId: (id) => set({ hoveredNodeId: id }),
 
   findComponentAt: (x, y) => {
     const nodes = get().nodes;
@@ -142,14 +172,16 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   },
 
   onNodesChange: (changes) => {
-    const nodes = get().nodes;
+    changes = changes.filter(c => c.type !== 'select');
+    const state = get();
+    const nodes = state.nodes;
     const nextChanges = changes.map(change => {
       if (change.type === 'position' && change.position) {
         return {
           ...change,
           position: {
-            x: Math.round(change.position.x / 20) * 20,
-            y: Math.round(change.position.y / 20) * 20,
+            x: Math.round((change.position.x + 10) / 20) * 20 - 10,
+            y: Math.round((change.position.y + 10) / 20) * 20 - 10,
           },
         };
       }
@@ -198,12 +230,12 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
       type,
       origin: meta.centerOrigin ? [0.5, 0.5] : [0, 0],
       position: {
-        x: Math.round(position.x / 20) * 20,
-        y: Math.round(position.y / 20) * 20,
+        x: Math.round(position.x / 20) * 20 - 10,
+        y: Math.round(position.y / 20) * 20 - 10,
       },
-      width: meta.width || 40,
-      height: meta.height || 40,
-      style: { width: meta.width || 40, height: meta.height || 40 },
+      width: meta.width || 60,
+      height: meta.height || 60,
+      style: { width: meta.width || 60, height: meta.height || 60 },
       data: {
         label: id,
         componentType: type,
@@ -213,9 +245,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
         color: meta.color,
         terminals: meta.terminals,
       },
-      draggable: true,
     };
-    set({ nodes: [...nodes, newNode], homeBoard: nextHome });
+    set({ nodes: [...nodes, newNode], homeBoard: nextHome, lastUsedComponentType: type });
   },
 
   removeComponent: (id) => {
@@ -326,11 +357,32 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   eraseWire: (x, y) => {
     const { wireGrid, activeLayer } = get();
     const key = wireKey(x, y, activeLayer);
-    if (wireGrid.has(key)) {
-      const newGrid = new Map(wireGrid);
-      newGrid.delete(key);
-      set({ wireGrid: newGrid });
+    if (!wireGrid.has(key)) return;
+
+    const newGrid = new Map(wireGrid);
+    newGrid.delete(key);
+
+    const neighbors: [number, number, number][] = [
+      [x - 1, y, TraceDir.RIGHT],
+      [x + 1, y, TraceDir.LEFT],
+      [x, y - 1, TraceDir.DOWN],
+      [x, y + 1, TraceDir.UP],
+    ];
+
+    for (const [nx, ny, dir] of neighbors) {
+      const nKey = wireKey(nx, ny, activeLayer);
+      const traces = newGrid.get(nKey);
+      if (traces !== undefined && (traces & dir)) {
+        const updated = traces & ~dir;
+        if (updated === 0) {
+          newGrid.delete(nKey);
+        } else {
+          newGrid.set(nKey, updated);
+        }
+      }
     }
+
+    set({ wireGrid: newGrid });
   },
 
   toggleLayer: () => {
@@ -341,7 +393,16 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
 
   // ─── Tool Actions ───
 
-  setActiveTool: (tool) => set({ activeTool: tool }),
+  setActiveTool: (tool) => {
+    if (tool === 'wire' || tool === 'select') {
+      const nodes = get().nodes.map(n => n.selected ? { ...n, selected: false } : n);
+      set({ activeTool: tool, selectedNodeId: null, selectedWireKey: null, nodes });
+    } else {
+      set({ activeTool: tool });
+    }
+  },
+  selectComponentType: (type) => set({ activeTool: 'component', selectedComponentType: type, lastUsedComponentType: type }),
+  activateComponentTool: () => set(state => ({ activeTool: 'component', selectedComponentType: state.lastUsedComponentType })),
   setIsPainting: (painting) => set({ isPainting: painting }),
 
   // ─── Wire Selection ───
@@ -354,8 +415,30 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
       get().removeComponent(selectedNodeId);
     }
     if (selectedWireKey) {
+      const cell = parseWireKey(selectedWireKey);
       const newGrid = new Map(get().wireGrid);
       newGrid.delete(selectedWireKey);
+
+      const neighbors: [number, number, number][] = [
+        [cell.x - 1, cell.y, TraceDir.RIGHT],
+        [cell.x + 1, cell.y, TraceDir.LEFT],
+        [cell.x, cell.y - 1, TraceDir.DOWN],
+        [cell.x, cell.y + 1, TraceDir.UP],
+      ];
+
+      for (const [nx, ny, dir] of neighbors) {
+        const nKey = wireKey(nx, ny, cell.layer);
+        const traces = newGrid.get(nKey);
+        if (traces !== undefined && (traces & dir)) {
+          const updated = traces & ~dir;
+          if (updated === 0) {
+            newGrid.delete(nKey);
+          } else {
+            newGrid.set(nKey, updated);
+          }
+        }
+      }
+
       set({ wireGrid: newGrid, selectedWireKey: null });
     }
   },
@@ -387,7 +470,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
   },
 
   clearAll: () => {
-    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select', homeBoard: { bx: 0, by: 0 } });
+    set({ nodes: [], wireGrid: new Map(), selectedNodeId: null, selectedWireKey: null, activeTool: 'select', selectedComponentType: COMPONENT_REGISTRY[0].type, lastUsedComponentType: COMPONENT_REGISTRY[0].type, homeBoard: { bx: 0, by: 0 } });
     Object.keys(idCounters).forEach(k => { idCounters[k] = 0; });
   },
 }));

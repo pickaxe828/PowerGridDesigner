@@ -132,9 +132,7 @@ function TraceCellRenderer({ cell, color, opacity, selected }: {
     const t = cell.traces;
 
     const left = cx - BODY_HALF;
-    const right = cx + BODY_HALF;
     const top = cy - BODY_HALF;
-    const bottom = cy + BODY_HALF;
 
     return (
         <g opacity={opacity}>

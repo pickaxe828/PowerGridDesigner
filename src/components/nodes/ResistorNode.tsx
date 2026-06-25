@@ -4,7 +4,7 @@ import { BaseNodeComponent } from './BaseNode';
 
 const ResistorNode = memo(({ ...props }: NodeProps) => (
     <BaseNodeComponent nodeProps={props} svgContent={
-        <img style={{ imageRendering: 'pixelated', width: '100%', height: '100%' }} src="resistor.png" alt="Resistor" />
+        <img style={{ imageRendering: 'pixelated', objectFit: 'contain', width: '100%', height: '100%' }} src="resistor.png" alt="Resistor" />
     } />
 ));
 ResistorNode.displayName = 'ResistorNode';
