@@ -39,8 +39,8 @@ export default function BoardBackground() {
         }
         // Any board containing components
         for (const node of nodes) {
-            const bx = Math.floor(node.position.x / BOARD_PX);
-            const by = Math.floor(node.position.y / BOARD_PX);
+            const bx = Math.floor((node.position.x + 10) / BOARD_PX);
+            const by = Math.floor((node.position.y + 10) / BOARD_PX);
             set.add(boardKey(bx, by));
         }
         return set;

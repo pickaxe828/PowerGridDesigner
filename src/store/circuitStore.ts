@@ -207,32 +207,30 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => ({
     const { nodes, wireGrid, homeBoard } = get();
     const isEmpty = nodes.length === 0 && wireGrid.size === 0;
 
-    let nextHome = homeBoard;
-    if (isEmpty) {
-      const bx = Math.floor(position.x / 320);
-      const by = Math.floor(position.y / 320);
-      if (bx !== homeBoard.bx || by !== homeBoard.by) {
-        nextHome = { bx, by };
-      }
-    }
-
     const meta = COMPONENT_MAP[type];
     const id = nextId(meta.idPrefix);
 
-    // Initialize custom properties from metadata defaults
     const customProperties: Record<string, number> = {};
     meta.properties?.forEach(p => {
       customProperties[p.id] = p.defaultValue;
     });
 
+    const snappedX = Math.round(position.x / 20) * 20 - 10;
+    const snappedY = Math.round(position.y / 20) * 20 - 10;
+
+    // If the design is empty and placement is on a different board, adopt it as home
+    let nextHome = homeBoard;
+    if (isEmpty) {
+      const bx = Math.floor((snappedX + 10) / 320);
+      const by = Math.floor((snappedY + 10) / 320);
+      nextHome = { bx, by };
+    }
+
     const newNode: Node = {
       id,
       type,
       origin: meta.centerOrigin ? [0.5, 0.5] : [0, 0],
-      position: {
-        x: Math.round(position.x / 20) * 20 - 10,
-        y: Math.round(position.y / 20) * 20 - 10,
-      },
+      position: { x: snappedX, y: snappedY },
       width: meta.width || 60,
       height: meta.height || 60,
       style: { width: meta.width || 60, height: meta.height || 60 },
